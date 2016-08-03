@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical" android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/lat"
+            android:padding="@dimen/list_item_margin"
+            android:id="@+id/list_item_location_lat_textView"
+            android:layout_alignParentTop="true"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/lng"
+            android:padding="@dimen/list_item_margin"
+            android:id="@+id/list_item_location_lng_textView"
+            android:layout_alignParentTop="true"
+            android:layout_toRightOf="@+id/list_item_location_lat_textView"
+            android:layout_toEndOf="@+id/list_item_location_lat_textView" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/time"
+            android:padding="@dimen/list_item_margin"
+            android:id="@+id/list_item_location_time_textView"
+            android:layout_alignParentTop="true"
+            android:layout_toRightOf="@+id/list_item_location_lng_textView"
+            android:layout_toEndOf="@+id/list_item_location_lng_textView" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/accuracy"
+            android:padding="@dimen/list_item_margin"
+            android:id="@+id/list_item_location_accuracy_textView"
+            android:layout_alignParentTop="true"
+            android:layout_toRightOf="@+id/list_item_location_time_textView"
+            android:layout_toEndOf="@+id/list_item_location_time_textView" />
+
+
+</RelativeLayout>
