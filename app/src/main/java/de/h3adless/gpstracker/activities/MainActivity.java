@@ -102,7 +102,12 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         if(broadcastReceiver != null) {
-            unregisterReceiver(broadcastReceiver);
+            //TODO eigentlich darf hier keine IllegalArgumentException geworfen werden. Das muss noch überarbeitet werden. Vorerst wird die Exception einfach gecatched
+            try {
+                unregisterReceiver(broadcastReceiver);
+            } catch (IllegalArgumentException e) {
+                e.printStackTrace();
+            }
         }
 
         super.onDestroy();

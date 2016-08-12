@@ -3,6 +3,7 @@ package de.h3adless.gpstracker.services;
 import android.Manifest;
 import android.app.Notification;
 import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.app.Service;
 import android.content.ContentValues;
 import android.content.Context;
@@ -24,6 +25,7 @@ import java.util.List;
 
 import de.h3adless.gpstracker.R;
 import de.h3adless.gpstracker.AppSettings;
+import de.h3adless.gpstracker.activities.MainActivity;
 import de.h3adless.gpstracker.database.TrackDatabase;
 import de.h3adless.gpstracker.database.TrackDatabaseHelper;
 import de.h3adless.gpstracker.database.TrackingLocation;
@@ -59,6 +61,16 @@ public class LocationService extends Service {
                 .setContentTitle(getText(R.string.notification_title))
                 .setContentText(getText(R.string.notification_message))
                 .setOngoing(true);
+
+        Intent resultIntent = new Intent(getApplicationContext(), MainActivity.class);
+
+        PendingIntent resultPendingIntent = PendingIntent.getActivity(
+                getApplicationContext(),
+                0,
+                resultIntent,
+                PendingIntent.FLAG_UPDATE_CURRENT);
+
+        notificationBuilder.setContentIntent(resultPendingIntent);
 
         Notification trackingNotification = notificationBuilder.build();
         this.notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
