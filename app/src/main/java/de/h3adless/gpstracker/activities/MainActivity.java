@@ -2,7 +2,6 @@ package de.h3adless.gpstracker.activities;
 
 import android.Manifest;
 import android.app.AlertDialog;
-import android.app.NotificationManager;
 import android.content.BroadcastReceiver;
 import android.content.ContentValues;
 import android.content.Context;
@@ -16,6 +15,7 @@ import android.location.Location;
 import android.location.LocationManager;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Debug;
 import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
@@ -46,10 +46,7 @@ import de.h3adless.gpstracker.services.LocationService;
 public class MainActivity extends AppCompatActivity {
 
     private final static String GPS = "GPS";
-    private boolean trackingEnabled = false;
     private BroadcastReceiver broadcastReceiver;
-
-    private Intent locationServiceIntent = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -61,16 +58,8 @@ public class MainActivity extends AppCompatActivity {
             trackButton.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    trackingEnabled = !trackingEnabled;
-                    Log.d(GPS, "Track button was clicked and tracking is now: " + trackingEnabled);
-
-                    if (trackingEnabled) {
-                        enableTracking();
-                        setButtonState();
-                    } else {
-                        disableTracking();
-                        setButtonState();
-                    }
+                    toggleTracking();
+                    Log.d(GPS, "Track button was clicked and tracking is now: " + AppSettings.TRACKING_ENABLED);
                 }
             });
         }
@@ -84,9 +73,25 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         };
+        AppSettings.LOCATION_SERVICE_INTENT = new Intent(this, LocationService.class);
+
+        //If we are tracking, register the broadcastreceiver
+        if (AppSettings.TRACKING_ENABLED) {
+            registerReceiver(broadcastReceiver, new IntentFilter(LocationService.BROADCAST_ACTION));
+            setButtonState();
+        }
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+    }
+
+    private void toggleTracking() {
+        if (AppSettings.TRACKING_ENABLED) {
+            disableTracking();
+        } else {
+            enableTracking();
+        }
+        setButtonState();
     }
 
     @Override
@@ -101,13 +106,8 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onDestroy() {
-        if(broadcastReceiver != null) {
-            //TODO eigentlich darf hier keine IllegalArgumentException geworfen werden. Das muss noch überarbeitet werden. Vorerst wird die Exception einfach gecatched
-            try {
-                unregisterReceiver(broadcastReceiver);
-            } catch (IllegalArgumentException e) {
-                e.printStackTrace();
-            }
+        if(AppSettings.TRACKING_ENABLED) {
+            unregisterReceiver(broadcastReceiver);
         }
 
         super.onDestroy();
@@ -148,7 +148,7 @@ public class MainActivity extends AppCompatActivity {
     private void setButtonState() {
         final Button trackButton = (Button) findViewById(R.id.button_track_me);
         Drawable drawable;
-        if (trackingEnabled) {
+        if (AppSettings.TRACKING_ENABLED) {
             drawable = ResourcesCompat.getDrawable(getResources(), R.drawable.rounded_button_active, null);
             trackButton.setText(R.string.now_tracking);
         } else {
@@ -181,7 +181,8 @@ public class MainActivity extends AppCompatActivity {
             showGpsAlert();
         }
 
-        locationServiceIntent = new Intent(this, LocationService.class);
+        AppSettings.TRACKING_ENABLED = true;
+
         registerReceiver(broadcastReceiver, new IntentFilter(LocationService.BROADCAST_ACTION));
 
         // Insert track id
@@ -199,20 +200,18 @@ public class MainActivity extends AppCompatActivity {
 
         values.put(TrackDatabase.TrackEntry.COLUMN_NAME_NAME, "Track vom " + dateAsString);
         long trackId = db.insert(TrackDatabase.TrackEntry.TABLE_NAME, null, values);
-        locationServiceIntent.putExtra(LocationService.TRACK_ID, trackId);
+        AppSettings.LOCATION_SERVICE_INTENT.putExtra(LocationService.TRACK_ID, trackId);
 
-        startService(locationServiceIntent);
+        startService(AppSettings.LOCATION_SERVICE_INTENT);
     }
 
     private void disableTracking() {
 
-        if(locationServiceIntent != null) {
-            stopService(locationServiceIntent);
-        }
+        stopService(AppSettings.LOCATION_SERVICE_INTENT);
 
-        if (broadcastReceiver != null) {
-            unregisterReceiver(broadcastReceiver);
-        }
+        unregisterReceiver(broadcastReceiver);
+
+        AppSettings.TRACKING_ENABLED = false;
 
         resetUI();
     }
