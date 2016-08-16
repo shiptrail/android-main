@@ -63,6 +63,7 @@ public class LocationService extends Service {
                 .setOngoing(true);
 
         Intent resultIntent = new Intent(getApplicationContext(), MainActivity.class);
+        resultIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 
         PendingIntent resultPendingIntent = PendingIntent.getActivity(
                 getApplicationContext(),
@@ -111,6 +112,7 @@ public class LocationService extends Service {
     @Override
     public void onDestroy() {
         super.onDestroy();
+        AppSettings.setTrackingEnabled(false);
         notificationManager.cancel(0);
         Log.v("STOP_SERVICE", "DONE");
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {

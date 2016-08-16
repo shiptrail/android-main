@@ -25,4 +25,12 @@
     <string name="time">TIME</string>
     <string name="accuracy">ACCURACY</string>
     <string name="track">Track</string>
+
+    <string name="action_settings_confirm">Confirm</string>
+    <string name="action_settings_cancel">Cancel</string>
+
+    <string name="activity_settings_time_between_gps">Zeit zwischen GPS-Signalen (ms)</string>
+    <string name="activity_settings_amount_to_send_together">Anzahl GPS-Signale pro Request</string>
+
+
 </resources>

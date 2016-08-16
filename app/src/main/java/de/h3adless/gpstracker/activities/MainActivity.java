@@ -59,7 +59,7 @@ public class MainActivity extends AppCompatActivity {
                 @Override
                 public void onClick(View view) {
                     toggleTracking();
-                    Log.d(GPS, "Track button was clicked and tracking is now: " + AppSettings.TRACKING_ENABLED);
+                    Log.d(GPS, "Track button was clicked and tracking is now: " + AppSettings.getTrackingEnabled());
                 }
             });
         }
@@ -73,10 +73,10 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         };
-        AppSettings.LOCATION_SERVICE_INTENT = new Intent(this, LocationService.class);
+        AppSettings.setLocationServiceIntent(new Intent(this, LocationService.class));
 
         //If we are tracking, register the broadcastreceiver
-        if (AppSettings.TRACKING_ENABLED) {
+        if (AppSettings.getTrackingEnabled()) {
             registerReceiver(broadcastReceiver, new IntentFilter(LocationService.BROADCAST_ACTION));
             setButtonState();
         }
@@ -86,7 +86,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void toggleTracking() {
-        if (AppSettings.TRACKING_ENABLED) {
+        if (AppSettings.getTrackingEnabled()) {
             disableTracking();
         } else {
             enableTracking();
@@ -106,7 +106,7 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onDestroy() {
-        if(AppSettings.TRACKING_ENABLED) {
+        if(AppSettings.getTrackingEnabled()) {
             unregisterReceiver(broadcastReceiver);
         }
 
@@ -127,7 +127,8 @@ public class MainActivity extends AppCompatActivity {
         int id = item.getItemId();
 
         if (id == R.id.action_settings) {
-            return true;
+            Intent intent = new Intent(this, SettingsActivity.class);
+            startActivity(intent);
         } else  if (id == R.id.action_list) {
 
             Intent intent = new Intent(this, TrackListActivity.class);
@@ -148,7 +149,7 @@ public class MainActivity extends AppCompatActivity {
     private void setButtonState() {
         final Button trackButton = (Button) findViewById(R.id.button_track_me);
         Drawable drawable;
-        if (AppSettings.TRACKING_ENABLED) {
+        if (AppSettings.getTrackingEnabled()) {
             drawable = ResourcesCompat.getDrawable(getResources(), R.drawable.rounded_button_active, null);
             trackButton.setText(R.string.now_tracking);
         } else {
@@ -181,7 +182,7 @@ public class MainActivity extends AppCompatActivity {
             showGpsAlert();
         }
 
-        AppSettings.TRACKING_ENABLED = true;
+        AppSettings.setTrackingEnabled(true);
 
         registerReceiver(broadcastReceiver, new IntentFilter(LocationService.BROADCAST_ACTION));
 
@@ -200,18 +201,20 @@ public class MainActivity extends AppCompatActivity {
 
         values.put(TrackDatabase.TrackEntry.COLUMN_NAME_NAME, "Track vom " + dateAsString);
         long trackId = db.insert(TrackDatabase.TrackEntry.TABLE_NAME, null, values);
-        AppSettings.LOCATION_SERVICE_INTENT.putExtra(LocationService.TRACK_ID, trackId);
+        Intent intent = AppSettings.getLocationServiceIntent();
+        intent.putExtra(LocationService.TRACK_ID, trackId);
+        AppSettings.setLocationServiceIntent(intent);
 
-        startService(AppSettings.LOCATION_SERVICE_INTENT);
+        startService(AppSettings.getLocationServiceIntent());
     }
 
     private void disableTracking() {
 
-        stopService(AppSettings.LOCATION_SERVICE_INTENT);
+        stopService(AppSettings.getLocationServiceIntent());
 
         unregisterReceiver(broadcastReceiver);
 
-        AppSettings.TRACKING_ENABLED = false;
+        AppSettings.setTrackingEnabled(false);
 
         resetUI();
     }
