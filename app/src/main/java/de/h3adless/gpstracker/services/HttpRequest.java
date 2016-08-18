@@ -62,8 +62,22 @@ public class HttpRequest extends AsyncTask<TrackingLocation, Integer, Void> {
             out.flush();
             out.close();
 
-            // TODO RETRY?
+            // TODO retry?
             int responseCode = connection.getResponseCode();
+
+            //TODO read input?
+            /*
+            BufferedReader in = new BufferedReader(new InputStreamReader(
+                    connection.getInputStream()));
+
+            String answer = "";
+            String read;
+            while ((read = in.readLine()) != null) {
+                answer += read;
+            }
+            in.close();
+            //do stuff with answer
+            */
 
             connection.disconnect();
 

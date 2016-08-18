@@ -116,9 +116,6 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.menu_main, menu);
-        MenuItem item = menu.findItem(R.id.action_main_menu);
-        item.setVisible(false);
-        invalidateOptionsMenu();
         return true;
     }
 
@@ -130,7 +127,6 @@ public class MainActivity extends AppCompatActivity {
             Intent intent = new Intent(this, SettingsActivity.class);
             startActivity(intent);
         } else  if (id == R.id.action_list) {
-
             Intent intent = new Intent(this, TrackListActivity.class);
             startActivity(intent);
         }
@@ -231,7 +227,8 @@ public class MainActivity extends AppCompatActivity {
         });
         builder.setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int id) {
-                // User cancelled the dialog, so do nothing
+                // User cancelled the dialog, cancel the tracking
+                toggleTracking();
             }
         });
 

@@ -36,6 +36,14 @@ public class StorageHandler {
 	 * Type for Storage. Used for the int AppSettings.SEND_TOGETHER
 	 */
 	public static final String STORAGE_SEND_TOGETHER = "send_together";
+	/**
+	 * Type for Storage. Used for the String AppSettings.SERVER_URL
+	 */
+	public static final String STORAGE_SERVER_URL = "server_url";
+	/**
+	 * Type for Storage. Used for the String AppSettings.SERVER_PORT
+	 */
+	public static final String STORAGE_SERVER_PORT = "server_port";
 
 	/**
 	 * @param context the context to use.

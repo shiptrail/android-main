@@ -17,6 +17,8 @@ public class SettingsActivity extends AppCompatActivity {
 	
 	private EditText editTrackInterval;
 	private EditText editSendTogether;
+	private EditText editServerUrl;
+	private EditText editServerPort;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -28,9 +30,13 @@ public class SettingsActivity extends AppCompatActivity {
 		
 		editTrackInterval = (EditText) findViewById(R.id.activity_settings_edit_time_between_gps);
 		editSendTogether = (EditText) findViewById(R.id.activity_settings_edit_amount_to_send_together);
+		editServerUrl = (EditText) findViewById(R.id.activity_settings_edit_server_url);
+		editServerPort = (EditText) findViewById(R.id.activity_settings_edit_server_port);
 		
 		editTrackInterval.setText(String.valueOf(AppSettings.getTrackingInterval()));
 		editSendTogether.setText(String.valueOf(AppSettings.getSendTogether()));
+		editServerUrl.setText(String.valueOf(AppSettings.getServerUrl()));
+		editServerPort.setText(String.valueOf(AppSettings.getServerPort()));
 	}
 
 	@Override
@@ -47,6 +53,7 @@ public class SettingsActivity extends AppCompatActivity {
 		
 		switch (id) {
 			case R.id.action_settings_confirm:
+				//we dont want trackInterval or sendTogether to be empty. So we check it.
 				String trackInterval = editTrackInterval.getText().toString();
 				if (!trackInterval.equals("")) {
 					AppSettings.setTrackingInterval(Long.parseLong(trackInterval));
@@ -55,6 +62,11 @@ public class SettingsActivity extends AppCompatActivity {
 				if (!sendTogether.equals("")) {
 					AppSettings.setSendTogether(Integer.parseInt(sendTogether));
 				}
+
+				//if port/ip are empty, we dont send at all. so we dont have to check them
+				AppSettings.setServerUrl(editServerUrl.getText().toString());
+				AppSettings.setServerPort(editServerPort.getText().toString());
+
 				finish();	
 			case R.id.action_settings_cancel:
 				finish();

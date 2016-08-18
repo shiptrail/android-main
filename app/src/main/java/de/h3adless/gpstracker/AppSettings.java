@@ -28,8 +28,8 @@ public class AppSettings extends Application {
     private static boolean TRACKING_ENABLED = false;
     private static Intent LOCATION_SERVICE_INTENT = null;
 
-    public static String SERVER_URL = null;
-    public static String SERVER_PORT = null;
+    public static String SERVER_URL = "";
+    public static String SERVER_PORT = "";
 
     public static long TRACKING_INTERVAL = 10000;
     public static int SEND_TOGETHER = 1;
@@ -39,7 +39,6 @@ public class AppSettings extends Application {
     public void onCreate() {
         super.onCreate();
         mainContext = this;
-        Log.d("AppSettings", "ONCREATE. maincontext: " + mainContext);
         loadDataFromFile();
     }
 
@@ -79,6 +78,24 @@ public class AppSettings extends Application {
         StorageHandler.save(mainContext, StorageHandler.STORAGE_SEND_TOGETHER, sendTogether);
     }
 
+    public static String getServerUrl() {
+        return SERVER_URL;
+    }
+
+    public static void setServerUrl(String serverUrl) {
+        SERVER_URL = serverUrl;
+        StorageHandler.save(mainContext, StorageHandler.STORAGE_SERVER_URL, serverUrl);
+    }
+
+    public static String getServerPort() {
+        return SERVER_PORT;
+    }
+
+    public static void setServerPort(String serverPort) {
+        SERVER_PORT = serverPort;
+        StorageHandler.save(mainContext, StorageHandler.STORAGE_SERVER_PORT, serverPort);
+    }
+
     private static void loadDataFromFile() {
         Serializable trackingEnabled = StorageHandler.load(mainContext, StorageHandler.STORAGE_TRACKING_BOOLEAN);
         if (trackingEnabled != null) {
@@ -102,6 +119,16 @@ public class AppSettings extends Application {
         Serializable sendTogether = StorageHandler.load(mainContext, StorageHandler.STORAGE_SEND_TOGETHER);
         if (sendTogether != null) {
             SEND_TOGETHER = (int) sendTogether;
+        }
+
+        Serializable serverUrl = StorageHandler.load(mainContext, StorageHandler.STORAGE_SERVER_URL);
+        if (serverUrl != null) {
+            SERVER_URL = (String) serverUrl;
+        }
+
+        Serializable serverPort = StorageHandler.load(mainContext, StorageHandler.STORAGE_SERVER_PORT);
+        if (serverPort != null) {
+            SERVER_PORT = (String) serverPort;
         }
     }
 
