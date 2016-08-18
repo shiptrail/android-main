@@ -31,6 +31,9 @@
 
     <string name="activity_settings_time_between_gps">Zeit zwischen GPS-Signalen (ms)</string>
     <string name="activity_settings_amount_to_send_together">Anzahl GPS-Signale pro Request</string>
+    <string name="activity_settings_explaining_time">Wie oft soll das Smartphone nach einem GPS-Signal suchen? Alles unter einer Sekunde ist wahrscheinlich unrealistisch. Empfehlung: 5000&#8211;10000 ms</string>
+    <string name="activity_settings_explaining_sending">Wieviele aufgenommene GPS-Signale sollen pro Verbindung an den Server gesandt werden? Eine höhere Zahl könnte hier Mobilfunk- und Stromverbrauch verringern. Je geringer, desto \"echtzeitiger\" ist die Anwendung. Alles unter 1 ist nicht erwünscht.</string>
+    <string name="activity_settings_explaining_server">Tracks an Server schicken?</string>
 
-
+    <string name="server_route">v2/%1$s/send</string>
 </resources>

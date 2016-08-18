@@ -23,6 +23,10 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 
+import javax.net.ssl.HttpsURLConnection;
+
+import de.h3adless.gpstracker.AppSettings;
+import de.h3adless.gpstracker.R;
 import de.h3adless.gpstracker.database.TrackingLocation;
 
 /**
@@ -32,20 +36,28 @@ import de.h3adless.gpstracker.database.TrackingLocation;
 
 public class HttpRequest extends AsyncTask<TrackingLocation, Integer, Void> {
 
-    private static String URL_ROUTE = "/v1/send";
     private static String URL;
+    private static final String BASE_URL = "shiptrail.lenucksi.eu/";
 
-    private SimpleDateFormat sdf = new SimpleDateFormat("hh:mm:ss:SSS", Locale.GERMAN);
+    @Override
+    protected void onPreExecute() {
+        if (!AppSettings.getSendTracksToServer() ||
+                AppSettings.RANDOM_DEVICE_UUID == null ||
+                AppSettings.RANDOM_DEVICE_UUID.equals("")) {
+            cancel(true);
+        }
 
-    public HttpRequest(String url, String port) {
-        URL = "http://" + url + ":" + port + URL_ROUTE;
+        URL = "https://" +
+                BASE_URL +
+                AppSettings.getMainContext().getString(R.string.server_route, AppSettings.RANDOM_DEVICE_UUID);
     }
 
     @Override
     protected Void doInBackground(TrackingLocation... locations) {
         try {
             URL url = new URL(URL);
-            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+            Log.d("HttpRequest","Url to send: " + URL);
+            HttpsURLConnection connection = (HttpsURLConnection) url.openConnection();
             connection.setConnectTimeout(10000);
             connection.setReadTimeout(10000);
             connection.setDoOutput(true);
@@ -55,6 +67,8 @@ public class HttpRequest extends AsyncTask<TrackingLocation, Integer, Void> {
             Gson gson = new Gson();
             String json = gson.toJson(locations);
 
+            Log.d("HttpRequest","Parameter to send: " + json);
+
             BufferedWriter out = new BufferedWriter(new OutputStreamWriter(
                     connection.getOutputStream()));
 
@@ -62,8 +76,24 @@ public class HttpRequest extends AsyncTask<TrackingLocation, Integer, Void> {
             out.flush();
             out.close();
 
-            // TODO RETRY?
+            // TODO retry?
             int responseCode = connection.getResponseCode();
+
+            Log.d("HttpRequest", "ResponseCode: " + responseCode);
+
+            //TODO read input?
+            /*
+            BufferedReader in = new BufferedReader(new InputStreamReader(
+                    connection.getInputStream()));
+
+            String answer = "";
+            String read;
+            while ((read = in.readLine()) != null) {
+                answer += read;
+            }
+            in.close();
+            //do stuff with answer
+            */
 
             connection.disconnect();
 

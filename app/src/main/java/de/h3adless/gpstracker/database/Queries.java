@@ -120,16 +120,16 @@ public class Queries {
 
         while(c.moveToNext()) {
             TrackingLocation loc = new TrackingLocation();
-            loc.trackId = c.getLong(c.getColumnIndex(TrackDatabase.LocationEntry.COLUMN_NAME_TRACK_ID));
-            loc.id = c.getLong(c.getColumnIndex(TrackDatabase.LocationEntry._ID));
+            //loc.trackId = c.getLong(c.getColumnIndex(TrackDatabase.LocationEntry.COLUMN_NAME_TRACK_ID));
+            //loc.id = c.getLong(c.getColumnIndex(TrackDatabase.LocationEntry._ID));
             loc.lat = c.getFloat(c.getColumnIndex(TrackDatabase.LocationEntry.COLUMN_NAME_LAT));
             loc.lng = c.getFloat(c.getColumnIndex(TrackDatabase.LocationEntry.COLUMN_NAME_LNG));
-            loc.accuracy = c.getFloat(c.getColumnIndex(TrackDatabase.LocationEntry.COLUMN_NAME_ACCURACY));
+            //loc.accuracy = c.getFloat(c.getColumnIndex(TrackDatabase.LocationEntry.COLUMN_NAME_ACCURACY));
             loc.ele = c.getFloat(c.getColumnIndex(TrackDatabase.LocationEntry.COLUMN_NAME_ALTITUDE));
             loc.heading = c.getFloat(c.getColumnIndex(TrackDatabase.LocationEntry.COLUMN_NAME_BEARING));
-            loc.speed = c.getFloat(c.getColumnIndex(TrackDatabase.LocationEntry.COLUMN_NAME_SPEED));
-            loc.time = c.getLong(c.getColumnIndex(TrackDatabase.LocationEntry.COLUMN_NAME_TIME));
-            loc.satCount = c.getInt(c.getColumnIndex(TrackDatabase.LocationEntry.COLUMN_NAME_SAT_COUNT));
+            //loc.speed = c.getFloat(c.getColumnIndex(TrackDatabase.LocationEntry.COLUMN_NAME_SPEED));
+            loc.timestamp = c.getLong(c.getColumnIndex(TrackDatabase.LocationEntry.COLUMN_NAME_TIME));
+            //loc.satCount = c.getInt(c.getColumnIndex(TrackDatabase.LocationEntry.COLUMN_NAME_SAT_COUNT));
 
             locs.add(loc);
         }

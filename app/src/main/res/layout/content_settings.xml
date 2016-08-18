@@ -12,6 +12,20 @@
     tools:context=".activities.SettingsActivity"
     android:orientation="vertical">
 
+    <Switch
+        android:id="@+id/activity_settings_switch_send_to_server"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/activity_settings_explaining_server"
+        android:textColor="@android:color/secondary_text_light"
+        android:checked="true"/>
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textColor="@android:color/secondary_text_light"
+        android:text="@string/activity_settings_explaining_time"/>
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -22,6 +36,7 @@
             android:layout_width="0dp"
             android:layout_weight="0.7"
             android:layout_height="wrap_content"
+            android:textColor="@android:color/secondary_text_light"
             android:text="@string/activity_settings_time_between_gps"/>
 
         <EditText
@@ -35,6 +50,12 @@
 
     </LinearLayout>
 
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textColor="@android:color/secondary_text_light"
+        android:text="@string/activity_settings_explaining_sending"/>
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -45,6 +66,7 @@
             android:layout_width="0dp"
             android:layout_weight="0.7"
             android:layout_height="wrap_content"
+            android:textColor="@android:color/secondary_text_light"
             android:text="@string/activity_settings_amount_to_send_together"/>
 
         <EditText
@@ -57,8 +79,6 @@
             android:inputType="number"/>
 
     </LinearLayout>
-
-
 
 </LinearLayout>
 

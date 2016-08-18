@@ -28,19 +28,21 @@ public class AppSettings extends Application {
     private static boolean TRACKING_ENABLED = false;
     private static Intent LOCATION_SERVICE_INTENT = null;
 
-    public static String SERVER_URL = null;
-    public static String SERVER_PORT = null;
+    private static boolean SEND_TRACKS_TO_SERVER = true;
 
-    public static long TRACKING_INTERVAL = 10000;
-    public static int SEND_TOGETHER = 1;
+    private static long TRACKING_INTERVAL = 10000;
+    private static int SEND_TOGETHER = 1;
 
     public static String RANDOM_DEVICE_UUID = null;
 
     public void onCreate() {
         super.onCreate();
         mainContext = this;
-        Log.d("AppSettings", "ONCREATE. maincontext: " + mainContext);
         loadDataFromFile();
+    }
+
+    public static AppSettings getMainContext() {
+        return mainContext;
     }
 
     public static boolean getTrackingEnabled() {
@@ -79,6 +81,15 @@ public class AppSettings extends Application {
         StorageHandler.save(mainContext, StorageHandler.STORAGE_SEND_TOGETHER, sendTogether);
     }
 
+    public static boolean getSendTracksToServer() {
+        return SEND_TRACKS_TO_SERVER;
+    }
+
+    public static void setSendTracksToServer(boolean sendTracksToServer) {
+        SEND_TRACKS_TO_SERVER = sendTracksToServer;
+        StorageHandler.save(mainContext, StorageHandler.STORAGE_SEND_TRACKS_TO_SERVER, sendTracksToServer);
+    }
+
     private static void loadDataFromFile() {
         Serializable trackingEnabled = StorageHandler.load(mainContext, StorageHandler.STORAGE_TRACKING_BOOLEAN);
         if (trackingEnabled != null) {
@@ -103,6 +114,12 @@ public class AppSettings extends Application {
         if (sendTogether != null) {
             SEND_TOGETHER = (int) sendTogether;
         }
+
+        Serializable sendTracksToServer = StorageHandler.load(mainContext, StorageHandler.STORAGE_SEND_TRACKS_TO_SERVER);
+        if (sendTracksToServer != null) {
+            SEND_TRACKS_TO_SERVER = (boolean) sendTracksToServer;
+        }
+
     }
 
 }

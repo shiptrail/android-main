@@ -53,6 +53,8 @@ public class LocationService extends Service {
 
     private static long currentTrack = -1;
 
+    private ArrayList<TrackingLocation> signalsNotSent = new ArrayList<>();
+
     @Override
     public void onCreate() {
         super.onCreate();
@@ -147,22 +149,25 @@ public class LocationService extends Service {
         public void onLocationChanged(final Location loc){
             Log.i("GPS", "Location changed");
 
-                // save positions
-                saveToDb(loc);
+            // save positions
+            saveToDb(loc);
 
-                // TODO send positions to server
 
-                if(AppSettings.SERVER_URL != null && !AppSettings.SERVER_URL.equals("")) {
-                    if(AppSettings.SERVER_PORT != null && !AppSettings.SERVER_PORT.equals("")) {
-                        HttpRequest httpRequest = new HttpRequest(AppSettings.SERVER_URL, AppSettings.SERVER_PORT);
-                        List<TrackingLocation> locs = new ArrayList<TrackingLocation>();
-                        httpRequest.execute(new TrackingLocation(loc));
-                    }
+            // TODO send positions to server
+            if (AppSettings.getSendTracksToServer()) {
+                signalsNotSent.add(new TrackingLocation(loc));
+                if (signalsNotSent.size() == AppSettings.getSendTogether()) {
+                    HttpRequest httpRequest = new HttpRequest();
+                    TrackingLocation[] parameters = new TrackingLocation[signalsNotSent.size()];
+                    signalsNotSent.toArray(parameters);
+                    httpRequest.execute(parameters);
+                    signalsNotSent.clear();
                 }
+            }
 
-                // Send to activity
-                intent.putExtra(BROADCAST_LOCATION, loc);
-                sendBroadcast(intent);
+            // Send to activity
+            intent.putExtra(BROADCAST_LOCATION, loc);
+            sendBroadcast(intent);
         }
 
         @Override

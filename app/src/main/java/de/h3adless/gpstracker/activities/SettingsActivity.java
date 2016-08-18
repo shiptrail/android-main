@@ -6,6 +6,7 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.EditText;
+import android.widget.Switch;
 
 import de.h3adless.gpstracker.AppSettings;
 import de.h3adless.gpstracker.R;
@@ -17,6 +18,7 @@ public class SettingsActivity extends AppCompatActivity {
 	
 	private EditText editTrackInterval;
 	private EditText editSendTogether;
+	private Switch switchSendTracksToServer;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -28,9 +30,11 @@ public class SettingsActivity extends AppCompatActivity {
 		
 		editTrackInterval = (EditText) findViewById(R.id.activity_settings_edit_time_between_gps);
 		editSendTogether = (EditText) findViewById(R.id.activity_settings_edit_amount_to_send_together);
+		switchSendTracksToServer = (Switch) findViewById(R.id.activity_settings_switch_send_to_server);
 		
 		editTrackInterval.setText(String.valueOf(AppSettings.getTrackingInterval()));
 		editSendTogether.setText(String.valueOf(AppSettings.getSendTogether()));
+		switchSendTracksToServer.setChecked(AppSettings.getSendTracksToServer());
 	}
 
 	@Override
@@ -47,6 +51,7 @@ public class SettingsActivity extends AppCompatActivity {
 		
 		switch (id) {
 			case R.id.action_settings_confirm:
+				//we dont want trackInterval or sendTogether to be empty. So we check it.
 				String trackInterval = editTrackInterval.getText().toString();
 				if (!trackInterval.equals("")) {
 					AppSettings.setTrackingInterval(Long.parseLong(trackInterval));
@@ -55,6 +60,9 @@ public class SettingsActivity extends AppCompatActivity {
 				if (!sendTogether.equals("")) {
 					AppSettings.setSendTogether(Integer.parseInt(sendTogether));
 				}
+
+				AppSettings.setSendTracksToServer(switchSendTracksToServer.isChecked());
+
 				finish();	
 			case R.id.action_settings_cancel:
 				finish();
