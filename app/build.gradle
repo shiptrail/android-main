@@ -6,6 +6,7 @@ android {
 
     defaultConfig {
         applicationId "de.h3adless.gpstracker"
+        testInstrumentationRunner "de.h3adless.gpstracker.TestRunner"
         minSdkVersion 14
         targetSdkVersion 24
         versionCode 1
@@ -28,4 +29,12 @@ dependencies {
     compile 'com.google.android.gms:play-services-location:9.0.2'
     compile 'com.google.android.gms:play-services-appindexing:9.0.2'
     compile 'com.google.code.gson:gson:2.7'
+
+    androidTestCompile 'com.android.support:support-annotations:24.0.0'
+    androidTestCompile 'com.android.support.test:runner:0.5'
+    androidTestCompile 'com.android.support.test:rules:0.5'
+    // Optional -- Hamcrest library
+    androidTestCompile 'org.hamcrest:hamcrest-library:1.3'
+    // Optional -- UI testing with Espresso
+    androidTestCompile 'com.android.support.test.espresso:espresso-core:2.2.2'
 }
