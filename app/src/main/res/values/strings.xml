@@ -36,4 +36,6 @@
     <string name="activity_settings_explaining_server">Tracks an Server schicken?</string>
 
     <string name="server_route">v2/%1$s/send</string>
+
+
 </resources>
