@@ -58,6 +58,7 @@ public class LocationService extends Service {
     @Override
     public void onCreate() {
         super.onCreate();
+        Log.d("LocationService","onCreate");
         NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(getApplicationContext())
                 .setSmallIcon(R.drawable.rounded_button_active)
                 .setContentTitle(getText(R.string.notification_title))
@@ -84,6 +85,7 @@ public class LocationService extends Service {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId){
+        Log.d("LocationService","onStartCommand");
         locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
         listener = new MyLocationListener();
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
