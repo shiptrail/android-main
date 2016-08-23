@@ -36,4 +36,14 @@
     <string name="activity_settings_explaining_server">Tracks an Server schicken?</string>
 
     <string name="server_route">v2/%1$s/send</string>
+
+    <string name="test_question_mark">\?</string>
+    <string name="test_accuracy">3.0</string>
+    <string name="test_bearing">5.0</string>
+    <string name="test_lat">1.0</string>
+    <string name="test_lng">2.0</string>
+    <string name="test_satellites">7</string>
+    <string name="test_speed">6.0</string>
+
+
 </resources>
