@@ -14,7 +14,6 @@
     <string name="notification_message">Currently tracking\.\.\.</string>
     <string name="notification_title">GPS Tracking</string>
     <string name="show_tracks">Show Tracks</string>
-    <string name="main_menu">Main Menu</string>
     <string name="tracks">Tracks</string>
     <string name="locations">Locations</string>
     <string name="send_by_mail">Send by Mail</string>

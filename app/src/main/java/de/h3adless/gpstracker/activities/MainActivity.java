@@ -183,8 +183,8 @@ public class MainActivity extends AppCompatActivity {
         registerReceiver(broadcastReceiver, new IntentFilter(LocationService.BROADCAST_ACTION));
 
         // Insert track id
-        if(AppSettings.RANDOM_DEVICE_UUID == null) {
-            AppSettings.RANDOM_DEVICE_UUID = UUID.randomUUID().toString();
+        if(AppSettings.getRandomDeviceUuid() == null) {
+            AppSettings.setRandomDeviceUuid(UUID.randomUUID().toString());
         }
 
         TrackDatabaseHelper trackDatabaseHelper = TrackDatabaseHelper.getInstance(getApplicationContext());

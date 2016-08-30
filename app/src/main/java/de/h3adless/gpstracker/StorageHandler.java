@@ -40,6 +40,10 @@ public class StorageHandler {
 	 * Type for Storage. Used for the String AppSettings.SEND_TRACKS_TO_SERVER
 	 */
 	public static final String STORAGE_SEND_TRACKS_TO_SERVER = "send_tracks_to_server";
+	/**
+	 * Type for Storage. Used for the String AppSettings.RANDOM_DEVICE_UUID
+	 */
+	public static final String STORAGE_RANDOM_DEVICE_UUID = "random_device_uuid";
 
 	/**
 	 * @param context the context to use.

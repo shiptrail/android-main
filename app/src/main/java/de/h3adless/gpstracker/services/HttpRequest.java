@@ -1,27 +1,13 @@
 package de.h3adless.gpstracker.services;
 
-import android.location.Location;
 import android.os.AsyncTask;
 import android.util.Log;
-import android.widget.TextView;
 
-import com.google.android.gms.appdatasearch.GetRecentContextCall;
 import com.google.gson.Gson;
 
-import java.io.BufferedReader;
 import java.io.BufferedWriter;
-import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
-import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
 import java.net.URL;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Calendar;
-import java.util.Collections;
-import java.util.List;
-import java.util.Locale;
 
 import javax.net.ssl.HttpsURLConnection;
 
@@ -42,14 +28,14 @@ public class HttpRequest extends AsyncTask<TrackingLocation, Integer, Void> {
     @Override
     protected void onPreExecute() {
         if (!AppSettings.getSendTracksToServer() ||
-                AppSettings.RANDOM_DEVICE_UUID == null ||
-                AppSettings.RANDOM_DEVICE_UUID.equals("")) {
+                AppSettings.getRandomDeviceUuid() == null ||
+                AppSettings.getRandomDeviceUuid().equals("")) {
             cancel(true);
         }
 
         URL = "https://" +
                 BASE_URL +
-                AppSettings.getMainContext().getString(R.string.server_route, AppSettings.RANDOM_DEVICE_UUID);
+                AppSettings.getMainContext().getString(R.string.server_route, AppSettings.getRandomDeviceUuid());
     }
 
     @Override

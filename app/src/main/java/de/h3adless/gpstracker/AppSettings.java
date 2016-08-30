@@ -33,7 +33,7 @@ public class AppSettings extends Application {
     private static long TRACKING_INTERVAL = 10000;
     private static int SEND_TOGETHER = 1;
 
-    public static String RANDOM_DEVICE_UUID = null;
+    private static String RANDOM_DEVICE_UUID = null;
 
     public void onCreate() {
         super.onCreate();
@@ -90,6 +90,15 @@ public class AppSettings extends Application {
         StorageHandler.save(mainContext, StorageHandler.STORAGE_SEND_TRACKS_TO_SERVER, sendTracksToServer);
     }
 
+    public static String getRandomDeviceUuid() {
+        return RANDOM_DEVICE_UUID;
+    }
+
+    public static void setRandomDeviceUuid(String randomDeviceUuid) {
+        RANDOM_DEVICE_UUID = randomDeviceUuid;
+        StorageHandler.save(mainContext, StorageHandler.STORAGE_RANDOM_DEVICE_UUID, randomDeviceUuid);
+    }
+
     private static void loadDataFromFile() {
         Serializable trackingEnabled = StorageHandler.load(mainContext, StorageHandler.STORAGE_TRACKING_BOOLEAN);
         if (trackingEnabled != null) {
@@ -118,6 +127,11 @@ public class AppSettings extends Application {
         Serializable sendTracksToServer = StorageHandler.load(mainContext, StorageHandler.STORAGE_SEND_TRACKS_TO_SERVER);
         if (sendTracksToServer != null) {
             SEND_TRACKS_TO_SERVER = (boolean) sendTracksToServer;
+        }
+
+        Serializable randomDeviceUuid = StorageHandler.load(mainContext, StorageHandler.STORAGE_RANDOM_DEVICE_UUID);
+        if (randomDeviceUuid != null) {
+            RANDOM_DEVICE_UUID = (String) randomDeviceUuid;
         }
 
     }
