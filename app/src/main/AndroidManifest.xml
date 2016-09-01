@@ -53,6 +53,7 @@
             android:screenOrientation="portrait"/>
 
         <service android:name=".services.LocationService" android:label="Tracking Service"/>
+        <service android:name=".services.TestLocationService" android:label="Test Tracking Service"/>
 
     </application>
 

@@ -1,6 +1,8 @@
 package de.h3adless.gpstracker.services;
 
+import android.net.TrafficStats;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.util.Log;
 
 import com.google.gson.Gson;
@@ -12,6 +14,7 @@ import java.net.URL;
 import javax.net.ssl.HttpsURLConnection;
 
 import de.h3adless.gpstracker.AppSettings;
+import de.h3adless.gpstracker.BuildConfig;
 import de.h3adless.gpstracker.R;
 import de.h3adless.gpstracker.database.TrackingLocation;
 
@@ -41,6 +44,9 @@ public class HttpRequest extends AsyncTask<TrackingLocation, Integer, Void> {
     @Override
     protected Void doInBackground(TrackingLocation... locations) {
         try {
+            if (BuildConfig.DEBUG) {
+                TrafficStats.setThreadStatsTag(0x1000);
+            }
             URL url = new URL(URL);
             Log.d("HttpRequest","Url to send: " + URL);
             HttpsURLConnection connection = (HttpsURLConnection) url.openConnection();
@@ -88,6 +94,10 @@ public class HttpRequest extends AsyncTask<TrackingLocation, Integer, Void> {
 
             e.printStackTrace();
             return null;
+        } finally {
+            if (BuildConfig.DEBUG) {
+                TrafficStats.clearThreadStatsTag();
+            }
         }
     }
 
