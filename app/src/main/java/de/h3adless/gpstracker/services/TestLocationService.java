@@ -2,12 +2,14 @@ package de.h3adless.gpstracker.services;
 
 import android.app.Service;
 import android.content.Intent;
+import android.os.Binder;
 import android.os.Handler;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
 import android.util.Log;
 
 import java.util.ArrayList;
+import java.util.Random;
 
 import de.h3adless.gpstracker.AppSettings;
 import de.h3adless.gpstracker.database.TrackingLocation;
@@ -21,6 +23,16 @@ public class TestLocationService extends Service {
 	private boolean running = false;
 
 	private TrackingLocation loc = new TrackingLocation();
+
+	private IBinder binder = new LocalBinder();
+
+	public class LocalBinder extends Binder {
+		public TestLocationService getService() {
+			// Return this instance of LocalService so clients can call public methods
+			return TestLocationService.this;
+		}
+	}
+
 
 	private Handler handler = new Handler();
 	private Runnable runnable = new Runnable() {
@@ -39,7 +51,7 @@ public class TestLocationService extends Service {
 	@Nullable
 	@Override
 	public IBinder onBind(Intent intent) {
-		return null;
+		return binder;
 	}
 
 	@Override
@@ -71,5 +83,10 @@ public class TestLocationService extends Service {
 
 	private void run() {
 		handler.postDelayed(runnable, 5000);
+	}
+
+	public int getRandomInt() {
+		Random r = new Random();
+		return r.nextInt();
 	}
 }
