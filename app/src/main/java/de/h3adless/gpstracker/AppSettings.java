@@ -2,10 +2,13 @@ package de.h3adless.gpstracker;
 
 import android.app.Application;
 import android.content.Intent;
-import android.util.Log;
 
 import java.io.Serializable;
 import java.net.URISyntaxException;
+import java.security.cert.Certificate;
+import java.util.HashMap;
+
+import javax.security.cert.X509Certificate;
 
 /**
  * Created by timo_ on 09.08.2016.
@@ -22,18 +25,27 @@ import java.net.URISyntaxException;
 
 public class AppSettings extends Application {
 
-    private static AppSettings mainContext = null;
+    public static final String INTENT_START_HTTPS_DIALOG = "start_https_dialog";
+    public static final String INTENT_START_CERTIFICATE_DIALOG = "start_certificate_dialog";
+    public static final String INTENT_START_CERTIFICATE_DIALOG_CERTIFICATES = "start_certificate_dialog_certificates";
+    public static final String INTENT_START_DIALOG_PARAMS = "start_dialog_params";
 
+
+    private static AppSettings mainContext = null;
 
     private static boolean TRACKING_ENABLED = false;
     private static Intent LOCATION_SERVICE_INTENT = null;
-
     private static boolean SEND_TRACKS_TO_SERVER = true;
-
     private static long TRACKING_INTERVAL = 10000;
     private static int SEND_TOGETHER = 1;
-
     private static String RANDOM_DEVICE_UUID = null;
+    private static boolean USE_HTTPS = true;
+    private static boolean USE_CUSTOM_SERVER = false;
+    private static String CUSTOM_SERVER_URL = "";
+    private static String CUSTOM_SERVER_PORT = "";
+
+    private static HashMap<String, Certificate[]> CUSTOM_ACCEPTED_CERTIFICATES = new HashMap<>();
+
 
     public void onCreate() {
         super.onCreate();
@@ -90,6 +102,14 @@ public class AppSettings extends Application {
         StorageHandler.save(mainContext, StorageHandler.STORAGE_SEND_TRACKS_TO_SERVER, sendTracksToServer);
     }
 
+    public static boolean getUseHttps() {
+        return USE_HTTPS;
+    }
+
+    public static void setUseHttps(boolean useHttps) {
+        USE_HTTPS = useHttps;
+    }
+
     public static String getRandomDeviceUuid() {
         return RANDOM_DEVICE_UUID;
     }
@@ -97,6 +117,47 @@ public class AppSettings extends Application {
     public static void setRandomDeviceUuid(String randomDeviceUuid) {
         RANDOM_DEVICE_UUID = randomDeviceUuid;
         StorageHandler.save(mainContext, StorageHandler.STORAGE_RANDOM_DEVICE_UUID, randomDeviceUuid);
+    }
+
+    public static boolean getUseCustomServer() {
+        return USE_CUSTOM_SERVER;
+    }
+
+    public static void setUseCustomServer(boolean useCustomServer) {
+        USE_CUSTOM_SERVER = useCustomServer;
+        StorageHandler.save(mainContext, StorageHandler.STORAGE_USE_CUSTOM_SERVER, useCustomServer);
+    }
+
+    public static String getCustomServerUrl() {
+        return CUSTOM_SERVER_URL;
+    }
+
+    public static void setCustomServerUrl(String customServerUrl) {
+        CUSTOM_SERVER_URL = customServerUrl;
+        StorageHandler.save(mainContext, StorageHandler.STORAGE_CUSTOM_SERVER_URL, customServerUrl);
+    }
+
+    public static String getCustomServerPort() {
+        return CUSTOM_SERVER_PORT;
+    }
+
+    public static void setCustomServerPort(String customServerPort) {
+        CUSTOM_SERVER_PORT = customServerPort;
+        StorageHandler.save(mainContext, StorageHandler.STORAGE_CUSTOM_SERVER_PORT, customServerPort);
+    }
+
+    public static HashMap<String, Certificate[]> getCustomAcceptedCertificates() {
+        return  CUSTOM_ACCEPTED_CERTIFICATES;
+    }
+
+    public static void addCustomAcceptedCertificate(String url, Certificate[] certificateChain) {
+        CUSTOM_ACCEPTED_CERTIFICATES.put(url, certificateChain);
+        StorageHandler.save(mainContext, StorageHandler.STORAGE_CUSTOM_ACCEPTED_CERTIFICATES, CUSTOM_ACCEPTED_CERTIFICATES);
+    }
+
+    public static void deleteCustomAcceptedCertificates() {
+        CUSTOM_ACCEPTED_CERTIFICATES.clear();
+        StorageHandler.save(mainContext, StorageHandler.STORAGE_CUSTOM_ACCEPTED_CERTIFICATES, CUSTOM_ACCEPTED_CERTIFICATES);
     }
 
     private static void loadDataFromFile() {
@@ -132,6 +193,31 @@ public class AppSettings extends Application {
         Serializable randomDeviceUuid = StorageHandler.load(mainContext, StorageHandler.STORAGE_RANDOM_DEVICE_UUID);
         if (randomDeviceUuid != null) {
             RANDOM_DEVICE_UUID = (String) randomDeviceUuid;
+        }
+
+        Serializable useHttps = StorageHandler.load(mainContext, StorageHandler.STORAGE_USE_HTTPS);
+        if (useHttps != null) {
+            USE_HTTPS = (boolean) useHttps;
+        }
+
+        Serializable useDefaultServer = StorageHandler.load(mainContext, StorageHandler.STORAGE_USE_CUSTOM_SERVER);
+        if (useDefaultServer != null) {
+            USE_CUSTOM_SERVER = (boolean) useDefaultServer;
+        }
+
+        Serializable customServerUrl = StorageHandler.load(mainContext, StorageHandler.STORAGE_CUSTOM_SERVER_URL);
+        if (customServerUrl != null) {
+            CUSTOM_SERVER_URL = (String) customServerUrl;
+        }
+
+        Serializable customServerPort = StorageHandler.load(mainContext, StorageHandler.STORAGE_CUSTOM_SERVER_PORT);
+        if (customServerPort != null) {
+            CUSTOM_SERVER_PORT = (String) customServerPort;
+        }
+
+        Serializable customAcceptedCertificates = StorageHandler.load(mainContext, StorageHandler.STORAGE_CUSTOM_ACCEPTED_CERTIFICATES);
+        if (customAcceptedCertificates != null) {
+            CUSTOM_ACCEPTED_CERTIFICATES = (HashMap<String, Certificate[]>) customAcceptedCertificates;
         }
 
     }
