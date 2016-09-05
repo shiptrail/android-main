@@ -38,18 +38,20 @@ import de.h3adless.gpstracker.AppSettings;
 import de.h3adless.gpstracker.R;
 import de.h3adless.gpstracker.database.TrackDatabase;
 import de.h3adless.gpstracker.database.TrackDatabaseHelper;
+import de.h3adless.gpstracker.database.TrackingLocation;
+import de.h3adless.gpstracker.services.HttpRequest;
 import de.h3adless.gpstracker.services.LocationService;
 
 /**
  * Created by H3ADLESS on 28.07.2016.
  */
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends MainActivityType {
 
     private final static String GPS = "GPS";
     private BroadcastReceiver broadcastReceiver;
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
@@ -95,21 +97,10 @@ public class MainActivity extends AppCompatActivity {
     }
 
     @Override
-    protected void onStart() {
-        super.onStart();
-    }
-
-    @Override
-    protected void onStop() {
-        super.onStop();
-    }
-
-    @Override
-    protected void onDestroy() {
+    public void onDestroy() {
         if(AppSettings.getTrackingEnabled()) {
             unregisterReceiver(broadcastReceiver);
         }
-
         super.onDestroy();
     }
 

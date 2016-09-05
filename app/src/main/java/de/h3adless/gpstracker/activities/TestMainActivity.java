@@ -1,5 +1,6 @@
 package de.h3adless.gpstracker.activities;
 
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.graphics.drawable.Drawable;
@@ -20,18 +21,20 @@ import java.util.UUID;
 
 import de.h3adless.gpstracker.AppSettings;
 import de.h3adless.gpstracker.R;
+import de.h3adless.gpstracker.database.TrackingLocation;
+import de.h3adless.gpstracker.services.HttpRequest;
 import de.h3adless.gpstracker.services.TestLocationService;
 
 /**
  * Created by H3ADLESS on 28.07.2016.
  */
-public class TestMainActivity extends AppCompatActivity {
+public class TestMainActivity extends MainActivityType {
 
 	private int startBatteryLvl = 0;
 	private long startTimestamp = 0;
 
 	@Override
-	protected void onCreate(Bundle savedInstanceState) {
+	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
 
@@ -50,8 +53,6 @@ public class TestMainActivity extends AppCompatActivity {
 
 		Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
 		setSupportActionBar(toolbar);
-
-
 	}
 
 	private void toggleTracking() {

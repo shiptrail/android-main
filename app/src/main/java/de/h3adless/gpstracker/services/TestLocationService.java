@@ -39,8 +39,10 @@ public class TestLocationService extends Service {
 		@Override
 		public void run() {
 			Log.d("TestLocationService", "Runnable run.");
-			HttpRequest httpRequest = new HttpRequest();
-			httpRequest.execute(loc);
+			if (AppSettings.getSendTracksToServer()) {
+				HttpRequest httpRequest = new HttpRequest(TestLocationService.this);
+				httpRequest.execute(loc);
+			}
 
 			if (running) {
 				TestLocationService.this.run();
