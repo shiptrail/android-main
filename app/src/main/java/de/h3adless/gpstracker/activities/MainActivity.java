@@ -73,6 +73,12 @@ public class MainActivity extends MainActivityType {
                 if (location != null) {
                     updateUI(location);
                 }
+                Float bearing = intent.getFloatExtra(LocationService.BROADCAST_SENSOR_BEARING,0);
+                Float pitch = intent.getFloatExtra(LocationService.BROADCAST_SENSOR_PITCH,0);
+                Float roll = intent.getFloatExtra(LocationService.BROADCAST_SENSOR_ROLL,0);
+                if (bearing != 0 || pitch != 0 || roll != 0) {
+                    updateSensorUI(bearing, pitch, roll);
+                }
             }
         };
         AppSettings.setLocationServiceIntent(new Intent(this, LocationService.class));
@@ -242,6 +248,11 @@ public class MainActivity extends MainActivityType {
         if (speedText != null) speedText.setText(R.string.unknown_value);
         if (satellitesText != null) satellitesText.setText(R.string.unknown_value);
         if (bearingText != null) bearingText.setText(R.string.unknown_value);
+
+        //reset Sensor Data
+        ((TextView) findViewById(R.id.activity_main_textview_bearing)).setText(R.string.activity_main_bearing);
+        ((TextView) findViewById(R.id.activity_main_textview_roll)).setText(R.string.activity_main_roll);
+        ((TextView) findViewById(R.id.activity_main_textview_pitch)).setText(R.string.activity_main_pitch);
     }
 
     private void updateUI(Location location){
@@ -258,6 +269,16 @@ public class MainActivity extends MainActivityType {
         if (speedText != null) speedText.setText(String.valueOf(location.getSpeed()));
         if (satellitesText != null) satellitesText.setText(String.valueOf(location.getExtras().getInt("satellites")));
         if (bearingText != null) bearingText.setText(String.valueOf(location.getBearing()));
+    }
+
+    private void updateSensorUI(Float bearing, Float pitch, Float roll) {
+        Log.d("updateSensorUI","bearing: " + bearing + " pitch: " + pitch + " roll: " + roll);
+        ((TextView) findViewById(R.id.activity_main_textview_bearing)).setText(
+                getString(R.string.activity_main_bearing_is, bearing));
+        ((TextView) findViewById(R.id.activity_main_textview_roll)).setText(
+                getString(R.string.activity_main_roll_is, roll));
+        ((TextView) findViewById(R.id.activity_main_textview_pitch)).setText(
+                getString(R.string.activity_main_pitch_is, pitch));
     }
 
 }

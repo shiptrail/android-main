@@ -10,6 +10,10 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.database.sqlite.SQLiteDatabase;
+import android.hardware.Sensor;
+import android.hardware.SensorEvent;
+import android.hardware.SensorEventListener;
+import android.hardware.SensorManager;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
@@ -37,6 +41,9 @@ public class LocationService extends Service {
 
     public static final String BROADCAST_ACTION = "GPS_BROADCAST";
     public static final String BROADCAST_LOCATION = "GPS_LOCATION";
+    public static final String BROADCAST_SENSOR_BEARING = "sensor_bearing";
+    public static final String BROADCAST_SENSOR_PITCH = "sensor_pitch";
+    public static final String BROADCAST_SENSOR_ROLL = "sensor_roll";
 
     public static final String TRACK_ID = "TRACK_ID";
 
@@ -48,6 +55,10 @@ public class LocationService extends Service {
     private static long trackID = 0;
 
     private NotificationManager notificationManager;
+    private SensorManager sensorManager;
+    private Sensor accelerometer, magnetometer;
+    private MySensorEventListener sensorListener = new MySensorEventListener();
+    private float bearing, pitch, roll = 0.0f;
 
     private Intent intent;
 
@@ -77,8 +88,12 @@ public class LocationService extends Service {
         notificationBuilder.setContentIntent(resultPendingIntent);
 
         Notification trackingNotification = notificationBuilder.build();
-        this.notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+        notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
         notificationManager.notify(0, trackingNotification);
+
+        sensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
+        accelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
+        magnetometer = sensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD);
 
         intent = new Intent(BROADCAST_ACTION);
     }
@@ -104,7 +119,11 @@ public class LocationService extends Service {
 
         locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, INTERVAL, 0, listener);
 
-//        return 0;
+        //registering for sensor data
+
+        sensorManager.registerListener(sensorListener, accelerometer, SensorManager.SENSOR_DELAY_UI);
+        sensorManager.registerListener(sensorListener, magnetometer, SensorManager.SENSOR_DELAY_UI);
+
         return START_REDELIVER_INTENT;
     }
 
@@ -124,6 +143,46 @@ public class LocationService extends Service {
             return;
         }
         locationManager.removeUpdates(listener);
+
+        //unregister sensor data
+        sensorManager.unregisterListener(sensorListener);
+    }
+
+    public class MySensorEventListener implements SensorEventListener {
+
+        float[] mGravity = null;
+        float[] mGeomagnetic = null;
+
+        @Override
+        public void onSensorChanged(SensorEvent event) {
+            if (event.sensor.getType() == Sensor.TYPE_ACCELEROMETER)
+                mGravity = event.values.clone();
+            if (event.sensor.getType() == Sensor.TYPE_MAGNETIC_FIELD)
+                mGeomagnetic = event.values.clone();
+            if (mGravity != null && mGeomagnetic != null) {
+                float R[] = new float[9];
+                float I[] = new float[9];
+                boolean success = SensorManager.getRotationMatrix(R, I, mGravity, mGeomagnetic);
+                if (success) {
+                    float orientation[] = new float[3];
+                    SensorManager.getOrientation(R, orientation);
+                    bearing = (float) Math.toDegrees(orientation[0]);
+                    pitch = (float) Math.toDegrees(orientation[1]);
+                    roll = (float) Math.toDegrees(orientation[2]);
+                    intent.putExtra(BROADCAST_SENSOR_BEARING, bearing);
+                    intent.putExtra(BROADCAST_SENSOR_PITCH, pitch);
+                    intent.putExtra(BROADCAST_SENSOR_ROLL, roll);
+                    sendBroadcast(intent);
+                    mGravity = null;
+                    mGeomagnetic = null;
+                }
+            }
+        }
+
+        @Override
+        public void onAccuracyChanged(Sensor sensor, int i) {
+
+        }
     }
 
     public class MyLocationListener implements LocationListener {

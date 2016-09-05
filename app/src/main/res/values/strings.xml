@@ -51,5 +51,11 @@
     <string name="certificate_failed_title">Zertifikat-Problem</string>
     <string name="certificate_failed">Das Zertifikat der Website konnte nicht akzeptiert werden. Manuell akzeptieren? (Falls nein, werden die Einstellungen automatisch so geändert, dass keine Daten mehr an den Server geschickt werden.) \n\n %1$s</string>
 
+    <string name="activity_main_bearing">Bearing:</string>
+    <string name="activity_main_bearing_is">Bearing: %1$f</string>
+    <string name="activity_main_pitch">Pitch:</string>
+    <string name="activity_main_pitch_is">Pitch: %1$f</string>
+    <string name="activity_main_roll">Roll:</string>
+    <string name="activity_main_roll_is">Roll: %1$f</string>
 
 </resources>

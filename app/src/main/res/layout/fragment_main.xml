@@ -146,5 +146,32 @@
         android:layout_alignParentRight="true"
         android:layout_alignParentEnd="true" />
 
+    <TextView
+        android:id="@+id/activity_main_textview_bearing"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/activity_main_bearing"
+        android:layout_alignTop="@id/textViewLng"
+        android:layout_centerHorizontal="true"
+        />
+
+    <TextView
+        android:id="@+id/activity_main_textview_pitch"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/activity_main_pitch"
+        android:layout_alignTop="@id/textViewBearing"
+        android:layout_centerHorizontal="true"
+        />
+
+    <TextView
+        android:id="@+id/activity_main_textview_roll"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/activity_main_roll"
+        android:layout_alignTop="@id/textViewAccuracy"
+        android:layout_centerHorizontal="true"
+        />
+
 
 </RelativeLayout>
