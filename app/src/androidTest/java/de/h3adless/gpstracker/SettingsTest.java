@@ -79,35 +79,17 @@ public class SettingsTest {
 
 			}
 		});
-		//save settings
+		
+		//save settings and destroy activity with that
 		onView(withId(R.id.action_settings_confirm)).perform(click());
 
-		//notify when activity is destroyed
-		ActivityLifecycleMonitor monitor = ActivityLifecycleMonitorRegistry.getInstance();
-		monitor.addLifecycleCallback(new ActivityLifecycleCallback() {
-			@Override
-			public void onActivityLifecycleChanged(Activity activity, Stage stage) {
-				if (activity.getClass() == SettingsActivity.class && stage == Stage.DESTROYED) {
-					synchronized (SettingsTest.this) {
-						SettingsTest.this.notify();
-						Log.d("SettingsTest","notified 1");
-					}
-				}
-			}
-		});
+		//start new activity
+		mActivityRule.launchActivity(new Intent(mActivityRule.getActivity(), SettingsActivity.class));
 
-		synchronized (SettingsTest.this) {
-			//wait until activity is destroyed
-			SettingsTest.this.wait();
-
-			//start new activity
-			mActivityRule.launchActivity(new Intent(mActivityRule.getActivity(), SettingsActivity.class));
-
-			//check settings
-			onView(withId(R.id.activity_settings_switch_send_to_server)).check(matches(sendToServer ? isChecked() : isNotChecked()));
-			onView(withId(R.id.activity_settings_edit_time_between_gps)).check(matches(withText(timeBetween)));
-			onView(withId(R.id.activity_settings_edit_amount_to_send_together)).check(matches(withText(sendTogether)));
-		}
+		//check settings
+		onView(withId(R.id.activity_settings_switch_send_to_server)).check(matches(sendToServer ? isChecked() : isNotChecked()));
+		onView(withId(R.id.activity_settings_edit_time_between_gps)).check(matches(withText(timeBetween)));
+		onView(withId(R.id.activity_settings_edit_amount_to_send_together)).check(matches(withText(sendTogether)));
 	}
 
 
