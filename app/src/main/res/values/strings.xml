@@ -33,8 +33,23 @@
     <string name="activity_settings_explaining_time">Wie oft soll das Smartphone nach einem GPS-Signal suchen? Alles unter einer Sekunde ist wahrscheinlich unrealistisch. Empfehlung: 5000&#8211;10000 ms</string>
     <string name="activity_settings_explaining_sending">Wieviele aufgenommene GPS-Signale sollen pro Verbindung an den Server gesandt werden? Eine höhere Zahl könnte hier Mobilfunk- und Stromverbrauch verringern. Je geringer, desto \"echtzeitiger\" ist die Anwendung. Alles unter 1 ist nicht erwünscht.</string>
     <string name="activity_settings_explaining_server">Tracks an Server schicken?</string>
+    <string name="activity_settings_explaining_https">HTTPS benutzen?</string>
+    <string name="activity_settings_explaining_custom">Anderen Server verwenden?</string>
+    <string name="activity_settings_custom_server_url">IP</string>
+    <string name="activity_settings_custom_server_port">Port</string>
+    <string name="activity_settings_custom_server_url_standard">52.40.140.41</string>
+    <string name="activity_settings_custom_server_port_standard">443</string>
+    <string name="activity_settings_delete_custom_certificates">Manuell akzeptierte Zertifikate löschen?</string>
+    <string name="activity_settings_delete_custom_certificates_button">Löschen</string>
+    <string name="activity_settings_toast_deleted_successfully">Manuell akzeptierte Zertifikate wurden gelöscht.</string>
 
-    <string name="server_route">v2/%1$s/send</string>
+    <string name="server_route">/v2/%1$s/send</string>
+
+    <string name="https_failed">Es konnte keine HTTPS-Verbindung aufgebaut werden. HTTP versuchen? (Falls nein, werden die Einstellungen automatisch so geändert, dass keine Daten mehr an den Server geschickt werden.)</string>
+    <string name="yes">ja</string>
+    <string name="no">nein</string>
+    <string name="certificate_failed_title">Zertifikat-Problem</string>
+    <string name="certificate_failed">Das Zertifikat der Website konnte nicht akzeptiert werden. Manuell akzeptieren? (Falls nein, werden die Einstellungen automatisch so geändert, dass keine Daten mehr an den Server geschickt werden.) \n\n %1$s</string>
 
 
 </resources>
