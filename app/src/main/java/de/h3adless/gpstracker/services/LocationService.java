@@ -154,12 +154,12 @@ public class LocationService extends Service {
             // save positions
             saveToDb(loc);
 
-
-            // TODO send positions to server
+            //send positions to server. add the location always to the list, but only send it
+            //if we have the correct settings.
+            signalsNotSent.add(new TrackingLocation(loc));
             if (AppSettings.getSendTracksToServer()) {
-                signalsNotSent.add(new TrackingLocation(loc));
-                if (signalsNotSent.size() == AppSettings.getSendTogether()) {
-                    HttpRequest httpRequest = new HttpRequest();
+                if (signalsNotSent.size() >= AppSettings.getSendTogether()) {
+                    HttpRequest httpRequest = new HttpRequest(LocationService.this);
                     TrackingLocation[] parameters = new TrackingLocation[signalsNotSent.size()];
                     signalsNotSent.toArray(parameters);
                     httpRequest.execute(parameters);
