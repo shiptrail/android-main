@@ -4,12 +4,14 @@ import android.location.Location;
 
 import com.google.gson.annotations.Expose;
 
+import java.io.Serializable;
+
 import de.h3adless.gpstracker.AppSettings;
 
 /**
  * Created by H3ADLESS on 30.07.2016.
  */
-public class TrackingLocation {
+public class TrackingLocation implements Serializable {
 
     public TrackingLocation() {}
 

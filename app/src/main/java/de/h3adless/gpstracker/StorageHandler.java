@@ -44,6 +44,26 @@ public class StorageHandler {
 	 * Type for Storage. Used for the String AppSettings.RANDOM_DEVICE_UUID
 	 */
 	public static final String STORAGE_RANDOM_DEVICE_UUID = "random_device_uuid";
+	/**
+	 * Type for Storage. Used for the String AppSettings.USE_HTTPS
+	 */
+	public static final String STORAGE_USE_HTTPS = "use_https";
+	/**
+	 * Type for Storage. Used for the String AppSettings.USE_CUSTOM_SERVER
+	 */
+	public static final String STORAGE_USE_CUSTOM_SERVER = "use_custom_server";
+	/**
+	 * Type for Storage. Used for the String AppSettings.CUSTOM_SERVER_PORT
+	 */
+	public static final String STORAGE_CUSTOM_SERVER_URL = "custom_server_port";
+	/**
+	 * Type for Storage. Used for the String AppSettings.CUSTOM_SERVER_URL
+	 */
+	public static final String STORAGE_CUSTOM_SERVER_PORT = "custom_server_url";
+	/**
+	 * Type for Storage. Used for the String AppSettings.CUSTOM_ACCEPTED_CERTIFICATES
+	 */
+	public static final String STORAGE_CUSTOM_ACCEPTED_CERTIFICATES = "custom_accepted_certificates";
 
 	/**
 	 * @param context the context to use.
