@@ -15,12 +15,10 @@ import android.location.Location;
 import android.location.LocationManager;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Debug;
 import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.res.ResourcesCompat;
-import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
@@ -38,8 +36,6 @@ import de.h3adless.gpstracker.AppSettings;
 import de.h3adless.gpstracker.R;
 import de.h3adless.gpstracker.database.TrackDatabase;
 import de.h3adless.gpstracker.database.TrackDatabaseHelper;
-import de.h3adless.gpstracker.database.TrackingLocation;
-import de.h3adless.gpstracker.services.HttpRequest;
 import de.h3adless.gpstracker.services.LocationService;
 
 /**
@@ -73,7 +69,7 @@ public class MainActivity extends MainActivityType {
                 if (location != null) {
                     updateUI(location);
                 }
-                Float bearing = intent.getFloatExtra(LocationService.BROADCAST_SENSOR_BEARING,0);
+                Float bearing = intent.getFloatExtra(LocationService.BROADCAST_SENSOR_AZIMUTH,0);
                 Float pitch = intent.getFloatExtra(LocationService.BROADCAST_SENSOR_PITCH,0);
                 Float roll = intent.getFloatExtra(LocationService.BROADCAST_SENSOR_ROLL,0);
                 if (bearing != 0 || pitch != 0 || roll != 0) {
@@ -272,7 +268,6 @@ public class MainActivity extends MainActivityType {
     }
 
     private void updateSensorUI(Float bearing, Float pitch, Float roll) {
-        Log.d("updateSensorUI","bearing: " + bearing + " pitch: " + pitch + " roll: " + roll);
         ((TextView) findViewById(R.id.activity_main_textview_bearing)).setText(
                 getString(R.string.activity_main_bearing_is, bearing));
         ((TextView) findViewById(R.id.activity_main_textview_roll)).setText(

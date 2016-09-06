@@ -22,7 +22,7 @@
     <string name="lat">LAT</string>
     <string name="lng">LNG</string>
     <string name="time">TIME</string>
-    <string name="accuracy">ACCURACY</string>
+    <string name="ele">ELE</string>
     <string name="track">Track</string>
 
     <string name="action_settings_confirm">Confirm</string>
