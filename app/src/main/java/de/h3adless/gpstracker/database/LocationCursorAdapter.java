@@ -30,21 +30,21 @@ public class LocationCursorAdapter extends CursorAdapter {
 
     @Override
     public void bindView(View view, Context context, Cursor cursor) {
-        TextView tvAccuracy = (TextView) view.findViewById(R.id.list_item_location_accuracy_textView);
+        TextView tvEle = (TextView) view.findViewById(R.id.list_item_location_ele_textView);
         TextView tvLat = (TextView) view.findViewById(R.id.list_item_location_lat_textView);
         TextView tvLng = (TextView) view.findViewById(R.id.list_item_location_lng_textView);
         TextView tvTime = (TextView) view.findViewById(R.id.list_item_location_time_textView);
 
-        Long accuracy = cursor.getLong(cursor.getColumnIndex(TrackDatabase.LocationEntry.COLUMN_NAME_ACCURACY));
         Float lat = cursor.getFloat(cursor.getColumnIndex(TrackDatabase.LocationEntry.COLUMN_NAME_LAT));
         Float lng = cursor.getFloat(cursor.getColumnIndex(TrackDatabase.LocationEntry.COLUMN_NAME_LNG));
-        Long time = cursor.getLong(cursor.getColumnIndex(TrackDatabase.LocationEntry.COLUMN_NAME_TIME));
+        Long time = cursor.getLong(cursor.getColumnIndex(TrackDatabase.LocationEntry.COLUMN_NAME_TIMESTAMP));
+        Float ele = cursor.getFloat(cursor.getColumnIndex(TrackDatabase.LocationEntry.COLUMN_NAME_ELE));
 
         SimpleDateFormat dateFormat = new SimpleDateFormat("dd.MM.yy \n HH:mm:ss:SSS", Locale.getDefault());
         Date date = new Date(time);
         String dateAsString = dateFormat.format(date);
 
-        tvAccuracy.setText(String.valueOf(accuracy));
+        tvEle.setText(String.valueOf(ele));
         tvLat.setText(String.valueOf(lat));
         tvLng.setText(String.valueOf(lng));
         tvTime.setText(dateAsString);

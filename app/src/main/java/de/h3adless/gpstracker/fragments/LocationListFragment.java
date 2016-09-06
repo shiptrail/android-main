@@ -32,7 +32,7 @@ import de.h3adless.gpstracker.database.LocationCursorAdapter;
 import de.h3adless.gpstracker.database.Queries;
 import de.h3adless.gpstracker.database.TrackDatabase;
 import de.h3adless.gpstracker.database.TrackDatabaseHelper;
-import de.h3adless.gpstracker.database.TrackingLocation;
+import de.h3adless.gpstracker.utils.cgps.TrackPoint;
 
 /**
  * Created by H3ADLESS (TH) on 28.07.2016.
@@ -106,7 +106,7 @@ public class LocationListFragment extends Fragment {
     }
 
     private void writeTmpFile(File f){
-        List<TrackingLocation> locs = Queries.getLocationsByTrackID(getContext(), trackID);
+        List<TrackPoint> locs = Queries.getLocationsByTrackID(getContext(), trackID);
         Gson gson = new Gson();
 
         try {
@@ -140,15 +140,11 @@ public class LocationListFragment extends Fragment {
                 TrackDatabase.LocationEntry._ID,
                 TrackDatabase.LocationEntry.COLUMN_NAME_LAT,
                 TrackDatabase.LocationEntry.COLUMN_NAME_LNG,
-                TrackDatabase.LocationEntry.COLUMN_NAME_ACCURACY,
-                TrackDatabase.LocationEntry.COLUMN_NAME_ALTITUDE,
-                TrackDatabase.LocationEntry.COLUMN_NAME_BEARING,
-                TrackDatabase.LocationEntry.COLUMN_NAME_SPEED,
-                TrackDatabase.LocationEntry.COLUMN_NAME_TIME,
-                TrackDatabase.LocationEntry.COLUMN_NAME_SAT_COUNT
+                TrackDatabase.LocationEntry.COLUMN_NAME_TIMESTAMP,
+                TrackDatabase.LocationEntry.COLUMN_NAME_ELE
         };
 
-        String sortOrder = TrackDatabase.LocationEntry.COLUMN_NAME_TIME + " ASC";
+        String sortOrder = TrackDatabase.LocationEntry.COLUMN_NAME_TIMESTAMP + " ASC";
 
         String whereClause = TrackDatabase.LocationEntry.COLUMN_NAME_TRACK_ID + " = ?";
 

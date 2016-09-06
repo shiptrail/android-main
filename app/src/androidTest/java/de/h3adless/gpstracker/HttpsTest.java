@@ -3,7 +3,6 @@ package de.h3adless.gpstracker;
 import android.support.test.rule.ActivityTestRule;
 import android.support.test.runner.AndroidJUnit4;
 
-import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -11,8 +10,8 @@ import org.junit.runner.RunWith;
 import java.util.UUID;
 
 import de.h3adless.gpstracker.activities.MainActivity;
-import de.h3adless.gpstracker.database.TrackingLocation;
 import de.h3adless.gpstracker.services.HttpRequest;
+import de.h3adless.gpstracker.utils.cgps.TrackPoint;
 
 import static android.support.test.espresso.Espresso.onView;
 import static android.support.test.espresso.action.ViewActions.click;
@@ -20,7 +19,6 @@ import static android.support.test.espresso.assertion.ViewAssertions.doesNotExis
 import static android.support.test.espresso.assertion.ViewAssertions.matches;
 import static android.support.test.espresso.matcher.ViewMatchers.isDisplayed;
 import static android.support.test.espresso.matcher.ViewMatchers.withText;
-import static org.hamcrest.core.IsNot.not;
 
 /**
  * Created by Sebu on 05.09.2016.
@@ -45,7 +43,7 @@ public class HttpsTest {
 		AppSettings.setCustomServerPort(mActivityRule.getActivity().getString(R.string.activity_settings_custom_server_port_standard));
 
 		HttpRequest httpRequest = new HttpRequest(mActivityRule.getActivity());
-		httpRequest.execute(new TrackingLocation());
+		httpRequest.execute(new TrackPoint(1,2,3,4));
 
 		//wait some seconds to let the Request fail
 		Thread.sleep(10000);
