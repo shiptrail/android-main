@@ -5,11 +5,9 @@ import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
-import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.database.sqlite.SQLiteDatabase;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
@@ -25,14 +23,13 @@ import android.util.Log;
 import android.widget.Toast;
 
 import java.util.ArrayList;
-import java.util.List;
 
 import de.h3adless.gpstracker.R;
 import de.h3adless.gpstracker.AppSettings;
 import de.h3adless.gpstracker.activities.MainActivity;
-import de.h3adless.gpstracker.database.TrackDatabase;
+import de.h3adless.gpstracker.database.Queries;
 import de.h3adless.gpstracker.database.TrackDatabaseHelper;
-import de.h3adless.gpstracker.database.TrackingLocation;
+import de.h3adless.gpstracker.utils.cgps.TrackPoint;
 
 /**
  * Created by H3ADLESS on 10.07.2016.
@@ -41,7 +38,7 @@ public class LocationService extends Service {
 
     public static final String BROADCAST_ACTION = "GPS_BROADCAST";
     public static final String BROADCAST_LOCATION = "GPS_LOCATION";
-    public static final String BROADCAST_SENSOR_BEARING = "sensor_bearing";
+    public static final String BROADCAST_SENSOR_AZIMUTH = "sensor_azimuth";
     public static final String BROADCAST_SENSOR_PITCH = "sensor_pitch";
     public static final String BROADCAST_SENSOR_ROLL = "sensor_roll";
 
@@ -58,13 +55,13 @@ public class LocationService extends Service {
     private SensorManager sensorManager;
     private Sensor accelerometer, magnetometer;
     private MySensorEventListener sensorListener = new MySensorEventListener();
-    private float bearing, pitch, roll = 0.0f;
+    private float azimuth, pitch, roll = 0.0f;
 
     private Intent intent;
 
     private static long currentTrack = -1;
 
-    private ArrayList<TrackingLocation> signalsNotSent = new ArrayList<>();
+    private ArrayList<TrackPoint> signalsNotSent = new ArrayList<>();
 
     @Override
     public void onCreate() {
@@ -166,10 +163,10 @@ public class LocationService extends Service {
                 if (success) {
                     float orientation[] = new float[3];
                     SensorManager.getOrientation(R, orientation);
-                    bearing = (float) Math.toDegrees(orientation[0]);
+                    azimuth = (float) Math.toDegrees(orientation[0]);
                     pitch = (float) Math.toDegrees(orientation[1]);
                     roll = (float) Math.toDegrees(orientation[2]);
-                    intent.putExtra(BROADCAST_SENSOR_BEARING, bearing);
+                    intent.putExtra(BROADCAST_SENSOR_AZIMUTH, azimuth);
                     intent.putExtra(BROADCAST_SENSOR_PITCH, pitch);
                     intent.putExtra(BROADCAST_SENSOR_ROLL, roll);
                     sendBroadcast(intent);
@@ -187,39 +184,51 @@ public class LocationService extends Service {
 
     public class MyLocationListener implements LocationListener {
 
-        private void saveToDb(Location location) {
-            if(trackDatabaseHelper == null) {
-                trackDatabaseHelper = TrackDatabaseHelper.getInstance(getApplicationContext());
-            }
+        private void saveToDb(TrackPoint trackPoint) {
 
-            SQLiteDatabase db = trackDatabaseHelper.getWritableDatabase();
-            ContentValues values = new ContentValues();
-            values.put(TrackDatabase.LocationEntry.COLUMN_NAME_TRACK_ID, trackID);
-            values.put(TrackDatabase.LocationEntry.COLUMN_NAME_ACCURACY, location.getAccuracy());
-            values.put(TrackDatabase.LocationEntry.COLUMN_NAME_ALTITUDE, location.getAltitude());
-            values.put(TrackDatabase.LocationEntry.COLUMN_NAME_BEARING, location.getBearing());
-            values.put(TrackDatabase.LocationEntry.COLUMN_NAME_LAT, location.getLatitude());
-            values.put(TrackDatabase.LocationEntry.COLUMN_NAME_LNG, location.getLongitude());
-            values.put(TrackDatabase.LocationEntry.COLUMN_NAME_SAT_COUNT, (Integer) location.getExtras().get("satellites"));
-            values.put(TrackDatabase.LocationEntry.COLUMN_NAME_SPEED, location.getSpeed());
-            values.put(TrackDatabase.LocationEntry.COLUMN_NAME_TIME, location.getTime());
-            db.insert(TrackDatabase.LocationEntry.TABLE_NAME, null, values);
+            int id = Queries.insertLocation(getApplicationContext(),
+                    trackID,
+                    trackPoint.lat,
+                    trackPoint.lng,
+                    trackPoint.timestamp,
+                    trackPoint.ele);
+
+            Queries.insertGpsMeta(getApplicationContext(),
+                    id,
+                    trackPoint.gpsMeta);
+
+            Queries.insertOrientaion(getApplicationContext(),
+                    id,
+                    trackPoint.orientation);
         }
 
         @Override
         public void onLocationChanged(final Location loc){
             Log.i("GPS", "Location changed");
 
+            float lat = (float) loc.getLatitude();
+            float lng = (float) loc.getLongitude();
+            long timestamp = loc.getTime();
+            float ele = (float) loc.getAltitude();
+            TrackPoint trackPoint = new TrackPoint(lat,lng,timestamp,ele);
+
+            float accuracy = loc.getAccuracy();
+            int satcount = (int) loc.getExtras().get("satellites");
+            int toffset = 0;
+            trackPoint.gpsMeta.add(new TrackPoint.GpsMeta(accuracy, satcount, toffset));
+
+            trackPoint.orientation.add(new TrackPoint.Orientation(azimuth, pitch, roll, 0));
+
             // save positions
-            saveToDb(loc);
+            saveToDb(trackPoint);
 
             //send positions to server. add the location always to the list, but only send it
             //if we have the correct settings.
-            signalsNotSent.add(new TrackingLocation(loc));
+            signalsNotSent.add(trackPoint);
             if (AppSettings.getSendTracksToServer()) {
                 if (signalsNotSent.size() >= AppSettings.getSendTogether()) {
                     HttpRequest httpRequest = new HttpRequest(LocationService.this);
-                    TrackingLocation[] parameters = new TrackingLocation[signalsNotSent.size()];
+                    TrackPoint[] parameters = new TrackPoint[signalsNotSent.size()];
                     signalsNotSent.toArray(parameters);
                     httpRequest.execute(parameters);
                     signalsNotSent.clear();
