@@ -2,19 +2,16 @@ package de.h3adless.gpstracker.activities;
 
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 
 import java.security.cert.Certificate;
 import java.util.Arrays;
 
-import javax.security.cert.X509Certificate;
-
 import de.h3adless.gpstracker.AppSettings;
 import de.h3adless.gpstracker.R;
-import de.h3adless.gpstracker.database.TrackingLocation;
 import de.h3adless.gpstracker.services.HttpRequest;
+import de.h3adless.gpstracker.utils.cgps.TrackPoint;
 
 /**
  * Created by Sebu on 02.09.2016.
@@ -27,10 +24,10 @@ public class MainActivityType extends AppCompatActivity {
 		super.onResume();
 		Intent intent = getIntent();
 		if (intent.getBooleanExtra(AppSettings.INTENT_START_HTTPS_DIALOG, false)) {
-			final TrackingLocation[] locations = (TrackingLocation[]) intent.getSerializableExtra(AppSettings.INTENT_START_DIALOG_PARAMS);
+			final TrackPoint[] locations = (TrackPoint[]) intent.getSerializableExtra(AppSettings.INTENT_START_DIALOG_PARAMS);
 			showHttpsDialog(locations);
 		} else if (intent.getBooleanExtra(AppSettings.INTENT_START_CERTIFICATE_DIALOG, false)) {
-			final TrackingLocation[] locations = (TrackingLocation[]) intent.getSerializableExtra(AppSettings.INTENT_START_DIALOG_PARAMS);
+			final TrackPoint[] locations = (TrackPoint[]) intent.getSerializableExtra(AppSettings.INTENT_START_DIALOG_PARAMS);
 			final Certificate[] certificates = (Certificate[]) intent.getSerializableExtra(AppSettings.INTENT_START_CERTIFICATE_DIALOG_CERTIFICATES);
 			showCertificateDialog(certificates, locations);
 		}
@@ -41,7 +38,7 @@ public class MainActivityType extends AppCompatActivity {
 		setIntent(intent);
 	}
 
-	public void showCertificateDialog(final Certificate[] certificates, final TrackingLocation... locations) {
+	public void showCertificateDialog(final Certificate[] certificates, final TrackPoint... locations) {
 		//dont try to send any new Requests right now unless user clicks on yes
 		AppSettings.setSendTracksToServer(false);
 
@@ -62,7 +59,7 @@ public class MainActivityType extends AppCompatActivity {
 		builder.show();
 	}
 
-	public void showHttpsDialog(final TrackingLocation... locations) {
+	public void showHttpsDialog(final TrackPoint... locations) {
 		//dont try to send any new Requests right now unless user clicks on yes
 		AppSettings.setSendTracksToServer(false);
 

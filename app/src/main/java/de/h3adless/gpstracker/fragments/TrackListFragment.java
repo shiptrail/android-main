@@ -18,7 +18,7 @@ import java.util.Map;
 import de.h3adless.gpstracker.R;
 import de.h3adless.gpstracker.activities.LocationListActivity;
 import de.h3adless.gpstracker.database.Queries;
-import de.h3adless.gpstracker.database.TrackingLocation;
+import de.h3adless.gpstracker.utils.cgps.TrackPoint;
 
 /**
  * Created by H3ADLESS (TH) on  28.07.2016.
@@ -49,7 +49,7 @@ public class TrackListFragment extends Fragment {
 
                     long id = (long) ids[i];
 
-                    List<TrackingLocation> result = Queries.getLocationsByTrackID(getActivity(), id);
+                    List<TrackPoint> result = Queries.getLocationsByTrackID(getActivity(), id);
                     int size = result.size();
 
                     Toast t = Toast.makeText(getActivity(), "Entry count: " + size, Toast.LENGTH_SHORT);
