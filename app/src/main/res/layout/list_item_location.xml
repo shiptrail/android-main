@@ -36,9 +36,9 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/accuracy"
+            android:text="@string/ele"
             android:padding="@dimen/list_item_margin"
-            android:id="@+id/list_item_location_accuracy_textView"
+            android:id="@+id/list_item_location_ele_textView"
             android:layout_alignParentTop="true"
             android:layout_toRightOf="@+id/list_item_location_time_textView"
             android:layout_toEndOf="@+id/list_item_location_time_textView" />

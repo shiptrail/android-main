@@ -26,14 +26,14 @@ import de.h3adless.gpstracker.AppSettings;
 import de.h3adless.gpstracker.BuildConfig;
 import de.h3adless.gpstracker.R;
 import de.h3adless.gpstracker.activities.MainActivity;
-import de.h3adless.gpstracker.database.TrackingLocation;
+import de.h3adless.gpstracker.utils.cgps.TrackPoint;
 
 /**
  * Created by Sebu on 09.07.2016.
  * Contact: sebastian.oltmanns.developer@gmail.com
  */
 
-public class HttpRequest extends AsyncTask<TrackingLocation, Integer, Void> {
+public class HttpRequest extends AsyncTask<TrackPoint, Integer, Void> {
 
     private static String URL;
     private static final String BASE_URL = "shiptrail.lenucksi.eu";
@@ -63,7 +63,7 @@ public class HttpRequest extends AsyncTask<TrackingLocation, Integer, Void> {
     }
 
     @Override
-    protected Void doInBackground(TrackingLocation... locations) {
+    protected Void doInBackground(TrackPoint... locations) {
         try {
             if (BuildConfig.DEBUG) {
                 TrafficStats.setThreadStatsTag(0x1000);
@@ -75,30 +75,28 @@ public class HttpRequest extends AsyncTask<TrackingLocation, Integer, Void> {
             if (AppSettings.getUseHttps()) {
                 connection = (HttpsURLConnection) url.openConnection();
 
-                Log.d("HttpRequest","creating HostnameVerifier..");
+                HostnameVerifier hostnameVerifier = new HostnameVerifier() {
+                    @Override
+                    public boolean verify(String hostname, SSLSession session) {
+                        HostnameVerifier hv =
+                                HttpsURLConnection.getDefaultHostnameVerifier();
 
-                    HostnameVerifier hostnameVerifier = new HostnameVerifier() {
-                        @Override
-                        public boolean verify(String hostname, SSLSession session) {
-                            HostnameVerifier hv =
-                                    HttpsURLConnection.getDefaultHostnameVerifier();
-
-                            try {
-                                certificates = session.getPeerCertificates();
-                            } catch (SSLPeerUnverifiedException e) {
-                                e.printStackTrace();
-                            }
-
-
-                            //check for manually accepted certificates.
-                            if (AppSettings.getCustomAcceptedCertificates().containsKey(AppSettings.getCustomServerUrl())
-                                    && certificates != null && certificates.length > 0) {
-                                return Arrays.equals(certificates, AppSettings.getCustomAcceptedCertificates().get(AppSettings.getCustomServerUrl()));
-                            }
-                            return hv.verify(hostname, session);
+                        try {
+                            certificates = session.getPeerCertificates();
+                        } catch (SSLPeerUnverifiedException e) {
+                            e.printStackTrace();
                         }
-                    };
-                    ((HttpsURLConnection) connection).setHostnameVerifier(hostnameVerifier);
+
+
+                        //check for manually accepted certificates.
+                        if (AppSettings.getCustomAcceptedCertificates().containsKey(AppSettings.getCustomServerUrl())
+                                && certificates != null && certificates.length > 0) {
+                            return Arrays.equals(certificates, AppSettings.getCustomAcceptedCertificates().get(AppSettings.getCustomServerUrl()));
+                        }
+                        return hv.verify(hostname, session);
+                    }
+                };
+                ((HttpsURLConnection) connection).setHostnameVerifier(hostnameVerifier);
             } else {
                 connection = (HttpURLConnection) url.openConnection();
             }
@@ -168,7 +166,7 @@ public class HttpRequest extends AsyncTask<TrackingLocation, Integer, Void> {
         }
     }
 
-    private void makeCertificateDialog(final TrackingLocation... locations) {
+    private void makeCertificateDialog(final TrackPoint... locations) {
         Intent intent = new Intent(context, MainActivity.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
         intent.putExtra(AppSettings.INTENT_START_CERTIFICATE_DIALOG, true);
@@ -178,7 +176,7 @@ public class HttpRequest extends AsyncTask<TrackingLocation, Integer, Void> {
         context.startActivity(intent);
     }
 
-    private void makeHttpsDialog(final TrackingLocation... locations) {
+    private void makeHttpsDialog(final TrackPoint... locations) {
         Intent intent = new Intent(context, MainActivity.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
         intent.putExtra(AppSettings.INTENT_START_HTTPS_DIALOG, true);

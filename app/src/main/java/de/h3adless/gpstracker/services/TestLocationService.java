@@ -8,11 +8,10 @@ import android.os.IBinder;
 import android.support.annotation.Nullable;
 import android.util.Log;
 
-import java.util.ArrayList;
 import java.util.Random;
 
 import de.h3adless.gpstracker.AppSettings;
-import de.h3adless.gpstracker.database.TrackingLocation;
+import de.h3adless.gpstracker.utils.cgps.TrackPoint;
 
 /**
  * Created by Sebu on 23.08.2016.
@@ -22,7 +21,7 @@ public class TestLocationService extends Service {
 
 	private boolean running = false;
 
-	private TrackingLocation loc = new TrackingLocation();
+	private TrackPoint loc = new TrackPoint(52.30f, 13.52f, System.currentTimeMillis(), 10);
 
 	private IBinder binder = new LocalBinder();
 
@@ -54,17 +53,6 @@ public class TestLocationService extends Service {
 	@Override
 	public IBinder onBind(Intent intent) {
 		return binder;
-	}
-
-	@Override
-	public void onCreate() {
-		super.onCreate();
-
-		loc.lat = 52.30f;
-		loc.lng = 13.52f;
-		loc.ele = 10;
-		loc.heading = 10;
-		loc.timestamp = 10;
 	}
 
 	@Override

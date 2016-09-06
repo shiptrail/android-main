@@ -3,6 +3,7 @@ package de.h3adless.gpstracker.database;
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.util.Log;
 
 /**
  * Created by H3ADLESS on 24.07.2016.
@@ -29,6 +30,11 @@ public class TrackDatabaseHelper extends SQLiteOpenHelper {
     public void onCreate(SQLiteDatabase db) {
         db.execSQL(TrackDatabase.SQL_CREATE_TRACK_TABLE);
         db.execSQL(TrackDatabase.SQL_CREATE_LOCATION_TABLE);
+        db.execSQL(TrackDatabase.GpsMetaEntry.SQL_CREATE_GPS_META_TABLE);
+        db.execSQL(TrackDatabase.AccelerometerEntry.SQL_CREATE_ACCELEROMETER_TABLE);
+        db.execSQL(TrackDatabase.CompassEntry.SQL_CREATE_COMPASS_TABLE);
+        db.execSQL(TrackDatabase.OrientationEntry.SQL_CREATE_ORIENTATION_TABLE);
+        db.execSQL(TrackDatabase.AnnotationEntry.SQL_CREATE_ANNOTATION_TABLE);
     }
 
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
@@ -37,6 +43,11 @@ public class TrackDatabaseHelper extends SQLiteOpenHelper {
         // to simply to discard the data and start over
         db.execSQL(TrackDatabase.SQL_DELETE_LOCATION_TABLE);
         db.execSQL(TrackDatabase.SQL_DELETE_TRACK_TABLE);
+        db.execSQL(TrackDatabase.GpsMetaEntry.SQL_DELETE_GPS_META_TABLE);
+        db.execSQL(TrackDatabase.AccelerometerEntry.SQL_DELETE_ACCELEROMETER_TABLE);
+        db.execSQL(TrackDatabase.CompassEntry.SQL_DELETE_COMPASS_TABLE);
+        db.execSQL(TrackDatabase.OrientationEntry.SQL_DELETE_ORIENTATION_TABLE);
+        db.execSQL(TrackDatabase.AnnotationEntry.SQL_DELETE_ANNOTATION_TABLE);
         onCreate(db);
     }
 
