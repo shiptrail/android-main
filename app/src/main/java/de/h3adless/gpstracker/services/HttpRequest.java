@@ -27,6 +27,7 @@ import de.h3adless.gpstracker.BuildConfig;
 import de.h3adless.gpstracker.R;
 import de.h3adless.gpstracker.activities.MainActivity;
 import de.h3adless.gpstracker.database.TrackingLocation;
+import de.h3adless.gpstracker.utils.cgps.TrackPointFactory;
 
 /**
  * Created by Sebu on 09.07.2016.
@@ -110,7 +111,7 @@ public class HttpRequest extends AsyncTask<TrackingLocation, Integer, Void> {
             connection.setRequestProperty("Content-Type", "application/json");
 
             Gson gson = new Gson();
-            String json = gson.toJson(locations);
+            String json = gson.toJson(TrackPointFactory.buildFrom(locations));
 
             Log.d("HttpRequest", "Parameter to send: " + json);
 
