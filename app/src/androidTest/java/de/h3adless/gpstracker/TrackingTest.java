@@ -50,13 +50,6 @@ public class TrackingTest { //extends ActivityInstrumentationTestCase2<MainActiv
     @Test
     public void trackTest() throws InterruptedException {
 
-        onView(withId(R.id.textViewAccuracy)).check(matches(withText("?")));
-        onView(withId(R.id.textViewBearing)).check(matches(withText("?")));
-        onView(withId(R.id.textViewLat)).check(matches(withText("?")));
-        onView(withId(R.id.textViewLng)).check(matches(withText("?")));
-        onView(withId(R.id.textViewSatellites)).check(matches(withText("?")));
-        onView(withId(R.id.textViewSpeed)).check(matches(withText("?")));
-
         onView(withId(R.id.button_track_me)).perform(click());
 
         Location location = new Location(LocationManager.GPS_PROVIDER);
@@ -79,12 +72,7 @@ public class TrackingTest { //extends ActivityInstrumentationTestCase2<MainActiv
 
         Thread.sleep(1000);
 
-        onView(withId(R.id.textViewAccuracy)).check(matches(withText("3.0")));
-        onView(withId(R.id.textViewBearing)).check(matches(withText("5.0")));
-        onView(withId(R.id.textViewLat)).check(matches(withText("1.0")));
-        onView(withId(R.id.textViewLng)).check(matches(withText("2.0")));
-        onView(withId(R.id.textViewSatellites)).check(matches(withText("7")));
-        onView(withId(R.id.textViewSpeed)).check(matches(withText("6.0")));
+        onView(withId(R.id.activity_main_textview_latlng)).check(matches(withText("1.0 / 2.0")));
     }
 
 }
