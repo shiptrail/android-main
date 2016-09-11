@@ -22,156 +22,91 @@
         android:layout_alignParentTop="true"
         android:layout_centerHorizontal="true" />
 
-    <TextView
-        android:paddingTop="@dimen/activity_vertical_margin"
-        android:layout_width="wrap_content"
+    <LinearLayout
+        android:id="@+id/activity_main_layout_annotations"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="@string/lng_label"
-        android:id="@+id/textViewLngLabel"
-        android:layout_below="@+id/button_track_me"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true" />
+        android:layout_below="@id/button_track_me"
+        android:layout_marginTop="10dp"
+        android:orientation="horizontal"
+        android:weightSum="1"
+        android:baselineAligned="false">
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="0.5"
+            android:orientation="vertical"
+            android:gravity="center">
+
+            <Button
+                android:id="@+id/activity_main_button_jibe_start"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:enabled="false"
+                android:onClick="onAnnotationClick"
+                android:text="@string/activity_main_button_jibe_start"/>
+
+            <Button
+                android:id="@+id/activity_main_button_jibe_middle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:enabled="false"
+                android:onClick="onAnnotationClick"
+                android:text="@string/activity_main_button_jibe_middle"/>
+
+            <Button
+                android:id="@+id/activity_main_button_jibe_end"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:enabled="false"
+                android:onClick="onAnnotationClick"
+                android:text="@string/activity_main_button_jibe_end"/>
+
+        </LinearLayout>
+
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="0.5"
+            android:orientation="vertical"
+            android:gravity="center">
+
+            <Button
+                android:id="@+id/activity_main_button_tacking_start"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:enabled="false"
+                android:onClick="onAnnotationClick"
+                android:text="@string/activity_main_button_tacking_start"/>
+
+            <Button
+                android:id="@+id/activity_main_button_tacking_middle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:enabled="false"
+                android:onClick="onAnnotationClick"
+                android:text="@string/activity_main_button_tacking_middle"/>
+
+            <Button
+                android:id="@+id/activity_main_button_tacking_end"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:enabled="false"
+                android:onClick="onAnnotationClick"
+                android:text="@string/activity_main_button_tacking_end"/>
+
+        </LinearLayout>
+
+    </LinearLayout>
 
     <TextView
+        android:id="@+id/activity_main_textview_latlng"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:textAppearance="?android:attr/textAppearanceLarge"
-        android:text="@string/unknown_value"
-        android:id="@+id/textViewLng"
-        android:layout_below="@+id/textViewLngLabel"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true" />
-
-    <TextView
-        android:paddingTop="@dimen/activity_vertical_margin"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/lat_label"
-        android:id="@+id/textViewLatLabel"
-        android:layout_below="@+id/button_track_me"
-        android:layout_alignRight="@+id/textViewLat"
-        android:layout_alignEnd="@+id/textViewLat" />
-
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textAppearance="?android:attr/textAppearanceLarge"
-        android:text="@string/unknown_value"
-        android:id="@+id/textViewLat"
-        android:layout_below="@+id/textViewLatLabel"
-        android:layout_alignParentRight="true"
-        android:layout_alignParentEnd="true" />
-
-    <TextView
-        android:paddingTop="@dimen/activity_vertical_margin"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/bearing_label"
-        android:id="@+id/textViewBearingLabel"
-        android:layout_below="@+id/textViewLng"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true" />
-
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textAppearance="?android:attr/textAppearanceLarge"
-        android:text="@string/unknown_value"
-        android:id="@+id/textViewBearing"
-        android:layout_below="@+id/textViewBearingLabel"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true" />
-
-    <TextView
-        android:paddingTop="@dimen/activity_vertical_margin"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/speed_label"
-        android:id="@+id/textViewSpeedLabel"
-        android:layout_above="@+id/textViewSpeed"
-        android:layout_alignLeft="@+id/textViewLatLabel"
-        android:layout_alignStart="@+id/textViewLatLabel"
-        android:layout_alignRight="@+id/textViewLat"
-        android:layout_alignEnd="@+id/textViewLat" />
-
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textAppearance="?android:attr/textAppearanceLarge"
-        android:text="@string/unknown_value"
-        android:id="@+id/textViewSpeed"
-        android:layout_below="@+id/textViewBearingLabel"
-        android:layout_alignParentRight="true"
-        android:layout_alignParentEnd="true" />
-
-    <TextView
-        android:paddingTop="@dimen/activity_vertical_margin"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/accuracy_label"
-        android:id="@+id/textViewAccuracyLabel"
-        android:layout_below="@+id/textViewBearing"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true" />
-
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textAppearance="?android:attr/textAppearanceLarge"
-        android:text="@string/unknown_value"
-        android:id="@+id/textViewAccuracy"
-        android:layout_below="@+id/textViewAccuracyLabel"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true" />
-
-    <TextView
-        android:paddingTop="@dimen/activity_vertical_margin"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/satellites_label"
-        android:id="@+id/textViewSatellitesLabel"
-        android:layout_below="@+id/textViewSpeed"
-        android:layout_alignRight="@+id/textViewSpeedLabel"
-        android:layout_alignEnd="@+id/textViewSpeedLabel"
-        android:layout_toRightOf="@+id/button_track_me"
-        android:layout_toEndOf="@+id/button_track_me" />
-
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textAppearance="?android:attr/textAppearanceLarge"
-        android:text="@string/unknown_value"
-        android:id="@+id/textViewSatellites"
-        android:layout_alignTop="@+id/textViewAccuracy"
-        android:layout_alignParentRight="true"
-        android:layout_alignParentEnd="true" />
-
-    <TextView
-        android:id="@+id/activity_main_textview_bearing"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/activity_main_bearing"
-        android:layout_alignTop="@id/textViewLng"
-        android:layout_centerHorizontal="true"
-        />
-
-    <TextView
-        android:id="@+id/activity_main_textview_pitch"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/activity_main_pitch"
-        android:layout_alignTop="@id/textViewBearing"
-        android:layout_centerHorizontal="true"
-        />
-
-    <TextView
-        android:id="@+id/activity_main_textview_roll"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/activity_main_roll"
-        android:layout_alignTop="@id/textViewAccuracy"
-        android:layout_centerHorizontal="true"
-        />
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"/>
 
 
 </RelativeLayout>

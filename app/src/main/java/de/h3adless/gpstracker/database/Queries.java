@@ -332,4 +332,31 @@ public class Queries {
 
         database.rawQuery(sql, args);
     }
+
+    public static void insertAnnotation(Context context, int locationID, List<TrackPoint.Annotation> annotations) {
+        SQLiteDatabase database = TrackDatabaseHelper.getInstance(context).getWritableDatabase();
+
+        String sql =
+                "INSERT INTO " + TrackDatabase.AnnotationEntry.TABLE_NAME +
+                        "(" + TrackDatabase.AnnotationEntry.COLUMN_NAME_LOCATION_ID +
+                        "," + TrackDatabase.AnnotationEntry.COLUMN_NAME_TOFFSET +
+                        "," + TrackDatabase.AnnotationEntry.COLUMN_NAME_TYPE +
+                        ") VALUES (?,?,?)";
+
+        String[] args = new String[3*annotations.size()];
+
+        for (int i = 0; i < annotations.size(); i++) {
+            TrackPoint.Annotation annotation = annotations.get(i);
+            args[i*5] = String.valueOf(locationID);
+            args[i*5+1] = String.valueOf(annotation.toffset);
+            args[i*5+2] = String.valueOf(annotation.type);
+
+            if (i == 0) {
+                continue;
+            }
+            sql += ",(?,?,?)";
+        }
+
+        database.rawQuery(sql, args);
+    }
 }
