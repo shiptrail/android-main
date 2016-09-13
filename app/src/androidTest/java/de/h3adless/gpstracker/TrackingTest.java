@@ -8,11 +8,14 @@ import android.os.Build;
 import android.os.Bundle;
 import android.support.test.rule.ActivityTestRule;
 import android.support.test.runner.AndroidJUnit4;
+import android.widget.TextView;
 
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+
+import java.util.Random;
 
 import de.h3adless.gpstracker.activities.MainActivity;
 
@@ -60,7 +63,6 @@ public class TrackingTest { //extends ActivityInstrumentationTestCase2<MainActiv
         onView(withId(R.id.button_track_me)).perform(click());
 
         Location location = new Location(LocationManager.GPS_PROVIDER);
-
         location.setLatitude(1.0);
         location.setLongitude(2.0);
         location.setAccuracy(3.0f);
@@ -75,9 +77,18 @@ public class TrackingTest { //extends ActivityInstrumentationTestCase2<MainActiv
             location.setElapsedRealtimeNanos(51235);
         }
         location.setTime(System.currentTimeMillis());
-        lm.setTestProviderLocation(LocationManager.GPS_PROVIDER, location);
 
-        Thread.sleep(1000);
+        setLocation(location);
+
+        TextView view = (TextView) mainActivity.findViewById(R.id.textViewAccuracy);
+
+        while(view.getText().equals("?")) {
+            try {
+                Thread.sleep(50);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
 
         onView(withId(R.id.textViewAccuracy)).check(matches(withText("3.0")));
         onView(withId(R.id.textViewBearing)).check(matches(withText("5.0")));
@@ -85,6 +96,39 @@ public class TrackingTest { //extends ActivityInstrumentationTestCase2<MainActiv
         onView(withId(R.id.textViewLng)).check(matches(withText("2.0")));
         onView(withId(R.id.textViewSatellites)).check(matches(withText("7")));
         onView(withId(R.id.textViewSpeed)).check(matches(withText("6.0")));
+
+        setLocation(null);
+
+        setLocation(null);
+
+
+    }
+
+    private Location setLocation(Location location){
+
+        Random random = new Random(System.currentTimeMillis());
+
+        if (location == null) {
+            location = new Location(LocationManager.GPS_PROVIDER);
+            location.setLatitude(random.nextDouble());
+            location.setLongitude(random.nextDouble());
+            location.setAccuracy(random.nextFloat());
+            location.setAltitude(random.nextDouble());
+            location.setBearing(random.nextFloat());
+            location.setSpeed(random.nextFloat());
+            Bundle b = new Bundle();
+            b.putInt("satellites", random.nextInt());
+            location.setExtras(b);
+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
+                location.setElapsedRealtimeNanos(System.nanoTime());
+            }
+            location.setTime(System.currentTimeMillis());
+        }
+
+        lm.setTestProviderLocation(LocationManager.GPS_PROVIDER, location);
+
+        return location;
     }
 
 }
