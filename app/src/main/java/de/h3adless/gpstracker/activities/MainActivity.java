@@ -26,6 +26,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -37,6 +38,7 @@ import de.h3adless.gpstracker.R;
 import de.h3adless.gpstracker.database.TrackDatabase;
 import de.h3adless.gpstracker.database.TrackDatabaseHelper;
 import de.h3adless.gpstracker.services.LocationService;
+import de.h3adless.gpstracker.utils.cgps.TrackPoint;
 
 /**
  * Created by H3ADLESS on 28.07.2016.
@@ -45,6 +47,8 @@ public class MainActivity extends MainActivityType {
 
     private final static String GPS = "GPS";
     private BroadcastReceiver broadcastReceiver;
+
+    private LocationService locationService;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -67,13 +71,7 @@ public class MainActivity extends MainActivityType {
             public void onReceive(Context context, Intent intent) {
                 Location location = (Location) intent.getExtras().get(LocationService.BROADCAST_LOCATION);
                 if (location != null) {
-                    updateUI(location);
-                }
-                Float bearing = intent.getFloatExtra(LocationService.BROADCAST_SENSOR_AZIMUTH,0);
-                Float pitch = intent.getFloatExtra(LocationService.BROADCAST_SENSOR_PITCH,0);
-                Float roll = intent.getFloatExtra(LocationService.BROADCAST_SENSOR_ROLL,0);
-                if (bearing != 0 || pitch != 0 || roll != 0) {
-                    updateSensorUI(bearing, pitch, roll);
+                    updateUI((float) location.getLatitude(), (float)location.getLongitude());
                 }
             }
         };
@@ -83,6 +81,7 @@ public class MainActivity extends MainActivityType {
         if (AppSettings.getTrackingEnabled()) {
             registerReceiver(broadcastReceiver, new IntentFilter(LocationService.BROADCAST_ACTION));
             setButtonState();
+            makeAnnotationButtonsEnabled(true);
         }
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
@@ -230,50 +229,65 @@ public class MainActivity extends MainActivityType {
         dialog.show();
     }
 
+    private void makeAnnotationButtonsEnabled(boolean enabled) {
+        findViewById(R.id.activity_main_button_jibe_end).setEnabled(enabled);
+        findViewById(R.id.activity_main_button_jibe_middle).setEnabled(enabled);
+        findViewById(R.id.activity_main_button_jibe_start).setEnabled(enabled);
+        findViewById(R.id.activity_main_button_tacking_end).setEnabled(enabled);
+        findViewById(R.id.activity_main_button_tacking_middle).setEnabled(enabled);
+        findViewById(R.id.activity_main_button_tacking_start).setEnabled(enabled);
+    }
+
     private void resetUI(){
-        TextView latText = (TextView) findViewById(R.id.textViewLat);
-        TextView lngText = (TextView) findViewById(R.id.textViewLng);
-        TextView accuracyText = (TextView) findViewById(R.id.textViewAccuracy);
-        TextView speedText = (TextView) findViewById(R.id.textViewSpeed);
-        TextView satellitesText = (TextView) findViewById(R.id.textViewSatellites);
-        TextView bearingText = (TextView) findViewById(R.id.textViewBearing);
-
-        if (latText != null) latText.setText(R.string.unknown_value);
-        if (lngText != null) lngText.setText(R.string.unknown_value);
-        if (accuracyText != null) accuracyText.setText(R.string.unknown_value);
-        if (speedText != null) speedText.setText(R.string.unknown_value);
-        if (satellitesText != null) satellitesText.setText(R.string.unknown_value);
-        if (bearingText != null) bearingText.setText(R.string.unknown_value);
-
-        //reset Sensor Data
-        ((TextView) findViewById(R.id.activity_main_textview_bearing)).setText(R.string.activity_main_bearing);
-        ((TextView) findViewById(R.id.activity_main_textview_roll)).setText(R.string.activity_main_roll);
-        ((TextView) findViewById(R.id.activity_main_textview_pitch)).setText(R.string.activity_main_pitch);
+        ((TextView) findViewById(R.id.activity_main_textview_latlng)).setText("");
+        makeAnnotationButtonsEnabled(false);
     }
 
-    private void updateUI(Location location){
-        TextView latText = (TextView) findViewById(R.id.textViewLat);
-        TextView lngText = (TextView) findViewById(R.id.textViewLng);
-        TextView accuracyText = (TextView) findViewById(R.id.textViewAccuracy);
-        TextView speedText = (TextView) findViewById(R.id.textViewSpeed);
-        TextView satellitesText = (TextView) findViewById(R.id.textViewSatellites);
-        TextView bearingText = (TextView) findViewById(R.id.textViewBearing);
-
-        if (latText != null) latText.setText(String.valueOf(location.getLatitude()));
-        if (lngText != null) lngText.setText(String.valueOf(location.getLongitude()));
-        if (accuracyText != null) accuracyText.setText(String.valueOf(location.getAccuracy()));
-        if (speedText != null) speedText.setText(String.valueOf(location.getSpeed()));
-        if (satellitesText != null) satellitesText.setText(String.valueOf(location.getExtras().getInt("satellites")));
-        if (bearingText != null) bearingText.setText(String.valueOf(location.getBearing()));
+    private void updateUI(float lat, float lng){
+        lat = Math.round(lat*100000.0f)/100000.0f;
+        lng = Math.round(lng*100000.0f)/100000.0f;
+        String txt = String.valueOf(lat) + " / " + String.valueOf(lng);
+        ((TextView) findViewById(R.id.activity_main_textview_latlng)).setText(txt);
+        findViewById(R.id.activity_main_layout_annotations).setOnTouchListener(null);
+        makeAnnotationButtonsEnabled(true);
     }
 
-    private void updateSensorUI(Float bearing, Float pitch, Float roll) {
-        ((TextView) findViewById(R.id.activity_main_textview_bearing)).setText(
-                getString(R.string.activity_main_bearing_is, bearing));
-        ((TextView) findViewById(R.id.activity_main_textview_roll)).setText(
-                getString(R.string.activity_main_roll_is, roll));
-        ((TextView) findViewById(R.id.activity_main_textview_pitch)).setText(
-                getString(R.string.activity_main_pitch_is, pitch));
+    public void onAnnotationClick(View v) {
+        Log.d("mainActivity","onAnnotationClick");
+        if (!AppSettings.getTrackingEnabled()) {
+            return;
+        }
+        String type = "";
+        switch (v.getId()) {
+            case R.id.activity_main_button_jibe_start:
+                type = TrackPoint.Annotation.TYPE_START_JIBE;
+                break;
+            case R.id.activity_main_button_jibe_middle:
+                type = TrackPoint.Annotation.TYPE_MID_JIBE;
+                break;
+            case R.id.activity_main_button_jibe_end:
+                type = TrackPoint.Annotation.TYPE_END_JIBE;
+                break;
+            case R.id.activity_main_button_tacking_start:
+                type = TrackPoint.Annotation.TYPE_START_TACKING;
+                break;
+            case R.id.activity_main_button_tacking_middle:
+                type = TrackPoint.Annotation.TYPE_MID_TACKING;
+                break;
+            case R.id.activity_main_button_tacking_end:
+                type = TrackPoint.Annotation.TYPE_END_TACKING;
+                break;
+            default:
+                return;
+        }
+
+        Intent intent = new Intent(LocationService.BROADCAST_ANNOTATION);
+        intent.putExtra(LocationService.BROADCAST_ANNOTATION_TYPE, type);
+        intent.putExtra(LocationService.BROADCAST_ANNOTATION_TIMESTAMP, System.currentTimeMillis());
+        sendBroadcast(intent);
+
+        Toast.makeText(MainActivity.this, getString(R.string.activity_main_toast_annotation_clicked, type), Toast.LENGTH_SHORT).show();
     }
+
 
 }

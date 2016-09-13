@@ -5,8 +5,10 @@ import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
@@ -15,6 +17,7 @@ import android.hardware.SensorManager;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
+import android.os.Binder;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.support.v4.app.ActivityCompat;
@@ -38,14 +41,14 @@ public class LocationService extends Service {
 
     public static final String BROADCAST_ACTION = "GPS_BROADCAST";
     public static final String BROADCAST_LOCATION = "GPS_LOCATION";
-    public static final String BROADCAST_SENSOR_AZIMUTH = "sensor_azimuth";
-    public static final String BROADCAST_SENSOR_PITCH = "sensor_pitch";
-    public static final String BROADCAST_SENSOR_ROLL = "sensor_roll";
+
+    public static final String BROADCAST_ANNOTATION = "ANNOTATION_BROADCAST";
+    public static final String BROADCAST_ANNOTATION_TYPE = "ANNOTATION_TYPE";
+    public static final String BROADCAST_ANNOTATION_TIMESTAMP = "ANNOTATION_TIMPESTAMP";
 
     public static final String TRACK_ID = "TRACK_ID";
 
     private static final int INTERVAL = 10000;
-    private TrackDatabaseHelper trackDatabaseHelper;
 
     private LocationManager locationManager;
     private MyLocationListener listener;
@@ -55,13 +58,24 @@ public class LocationService extends Service {
     private SensorManager sensorManager;
     private Sensor accelerometer, magnetometer;
     private MySensorEventListener sensorListener = new MySensorEventListener();
-    private float azimuth, pitch, roll = 0.0f;
 
     private Intent intent;
 
     private static long currentTrack = -1;
 
     private ArrayList<TrackPoint> signalsNotSent = new ArrayList<>();
+    private int lastLocationId = -1;
+
+    private BroadcastReceiver annotationsReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            String type = intent.getStringExtra(BROADCAST_ANNOTATION_TYPE);
+            long timestamp = intent.getLongExtra(BROADCAST_ANNOTATION_TIMESTAMP, System.currentTimeMillis());
+            if (type != null && !type.equals("")) {
+                addAnnotation(type, timestamp);
+            }
+        }
+    };
 
     @Override
     public void onCreate() {
@@ -121,6 +135,9 @@ public class LocationService extends Service {
         sensorManager.registerListener(sensorListener, accelerometer, SensorManager.SENSOR_DELAY_UI);
         sensorManager.registerListener(sensorListener, magnetometer, SensorManager.SENSOR_DELAY_UI);
 
+        //register the annotations receiver
+        registerReceiver(annotationsReceiver, new IntentFilter(BROADCAST_ANNOTATION));
+
         return START_REDELIVER_INTENT;
     }
 
@@ -143,6 +160,41 @@ public class LocationService extends Service {
 
         //unregister sensor data
         sensorManager.unregisterListener(sensorListener);
+
+        //unregister annotations receiver
+        unregisterReceiver(annotationsReceiver);
+
+        //send all data we didnt send yet!
+        if (signalsNotSent.size() > 0) {
+            HttpRequest httpRequest = new HttpRequest(LocationService.this);
+            TrackPoint[] parameters = new TrackPoint[signalsNotSent.size()];
+            signalsNotSent.toArray(parameters);
+            httpRequest.execute(parameters);
+        }
+    }
+
+	/**
+	 *
+     * @param annotation has to be one of de.h3adless.gpstracker.utils.cgps.trackpoint.annotations public
+     *                   static final Strings, like TYPE_START_JIBE
+     * @param timestamp
+     */
+    private void addAnnotation(String annotation, long timestamp) {
+        if (signalsNotSent.size() == 0) {
+            return;
+        }
+        //save annotation
+        int toffsetInt = -1;
+        long toffset = timestamp - signalsNotSent.get(signalsNotSent.size()-1).timestamp;
+        if (toffset < Integer.MAX_VALUE && toffset > Integer.MIN_VALUE) {
+            toffsetInt = (int) toffset;
+        }
+        TrackPoint.Annotation annotationData = new TrackPoint.Annotation(annotation, toffsetInt);
+        signalsNotSent.get(signalsNotSent.size()-1).annotation.add(annotationData);
+        //save annotation to DB
+        ArrayList<TrackPoint.Annotation> annotationDataList = new ArrayList<>(1);
+        annotationDataList.add(annotationData);
+        Queries.insertAnnotation(getApplicationContext(), lastLocationId, annotationDataList);
     }
 
     public class MySensorEventListener implements SensorEventListener {
@@ -150,28 +202,49 @@ public class LocationService extends Service {
         float[] mGravity = null;
         float[] mGeomagnetic = null;
 
+        long nextTimestampToSave = 0;
+
         @Override
         public void onSensorChanged(SensorEvent event) {
-            if (event.sensor.getType() == Sensor.TYPE_ACCELEROMETER)
-                mGravity = event.values.clone();
-            if (event.sensor.getType() == Sensor.TYPE_MAGNETIC_FIELD)
-                mGeomagnetic = event.values.clone();
-            if (mGravity != null && mGeomagnetic != null) {
-                float R[] = new float[9];
-                float I[] = new float[9];
-                boolean success = SensorManager.getRotationMatrix(R, I, mGravity, mGeomagnetic);
-                if (success) {
-                    float orientation[] = new float[3];
-                    SensorManager.getOrientation(R, orientation);
-                    azimuth = (float) Math.toDegrees(orientation[0]);
-                    pitch = (float) Math.toDegrees(orientation[1]);
-                    roll = (float) Math.toDegrees(orientation[2]);
-                    intent.putExtra(BROADCAST_SENSOR_AZIMUTH, azimuth);
-                    intent.putExtra(BROADCAST_SENSOR_PITCH, pitch);
-                    intent.putExtra(BROADCAST_SENSOR_ROLL, roll);
-                    sendBroadcast(intent);
-                    mGravity = null;
-                    mGeomagnetic = null;
+            //check if we want to get sensor data already
+            long current = System.currentTimeMillis();
+            if (current >= nextTimestampToSave && signalsNotSent.size() > 0) {
+                nextTimestampToSave = current;
+
+                if (event.sensor.getType() == Sensor.TYPE_ACCELEROMETER)
+                    mGravity = event.values.clone();
+                if (event.sensor.getType() == Sensor.TYPE_MAGNETIC_FIELD)
+                    mGeomagnetic = event.values.clone();
+                if (mGravity != null && mGeomagnetic != null) {
+                    float R[] = new float[9];
+                    float I[] = new float[9];
+                    boolean success = SensorManager.getRotationMatrix(R, I, mGravity, mGeomagnetic);
+                    if (success) {
+                        float orientation[] = new float[3];
+                        SensorManager.getOrientation(R, orientation);
+                        float azimuth =  (float) Math.toDegrees(orientation[0]);
+                        float pitch = (float) Math.toDegrees(orientation[1]);
+                        float roll = (float) Math.toDegrees(orientation[2]);
+
+                        //save ORIENTATION data
+                        long toffset = current - signalsNotSent.get(signalsNotSent.size()-1).timestamp;
+                        int toffsetInteger = -1;
+                        if (toffset < Integer.MAX_VALUE && toffset > Integer.MIN_VALUE) {
+                            toffsetInteger = (int) toffset;
+                        }
+                        TrackPoint.Orientation orientationData = new TrackPoint.Orientation(azimuth,pitch,roll,toffsetInteger);
+                        signalsNotSent.get(signalsNotSent.size()-1).orientation.add(orientationData);
+                        //save ORIENTATION data to DB
+                        ArrayList<TrackPoint.Orientation> orientationDataList = new ArrayList<>(1);
+                        orientationDataList.add(orientationData);
+                        Queries.insertOrientation(getApplicationContext(), lastLocationId, orientationDataList);
+
+                        //determine when the next sensor data shall be monitored
+                        nextTimestampToSave += AppSettings.getTrackingInterval()/10;
+
+                        mGravity = null;
+                        mGeomagnetic = null;
+                    }
                 }
             }
         }
@@ -184,47 +257,12 @@ public class LocationService extends Service {
 
     public class MyLocationListener implements LocationListener {
 
-        private void saveToDb(TrackPoint trackPoint) {
-
-            int id = Queries.insertLocation(getApplicationContext(),
-                    trackID,
-                    trackPoint.lat,
-                    trackPoint.lng,
-                    trackPoint.timestamp,
-                    trackPoint.ele);
-
-            Queries.insertGpsMeta(getApplicationContext(),
-                    id,
-                    trackPoint.gpsMeta);
-
-            Queries.insertOrientation(getApplicationContext(),
-                    id,
-                    trackPoint.orientation);
-        }
-
         @Override
         public void onLocationChanged(final Location loc){
             Log.i("GPS", "Location changed");
 
-            float lat = (float) loc.getLatitude();
-            float lng = (float) loc.getLongitude();
-            long timestamp = loc.getTime();
-            float ele = (float) loc.getAltitude();
-            TrackPoint trackPoint = new TrackPoint(lat,lng,timestamp,ele);
-
-            float accuracy = loc.getAccuracy();
-            int satcount = (int) loc.getExtras().get("satellites");
-            int toffset = 0;
-            trackPoint.gpsMeta.add(new TrackPoint.GpsMeta(accuracy, satcount, toffset));
-
-            trackPoint.orientation.add(new TrackPoint.Orientation(azimuth, pitch, roll, 0));
-
-            // save positions
-            saveToDb(trackPoint);
-
-            //send positions to server. add the location always to the list, but only send it
-            //if we have the correct settings.
-            signalsNotSent.add(trackPoint);
+            //send the data we collected until now to server. add the location always
+            //to the list, but only send it if we have the correct settings.
             if (AppSettings.getSendTracksToServer()) {
                 if (signalsNotSent.size() >= AppSettings.getSendTogether()) {
                     HttpRequest httpRequest = new HttpRequest(LocationService.this);
@@ -235,7 +273,36 @@ public class LocationService extends Service {
                 }
             }
 
-            // Send to activity
+            //save the data we just got
+
+            //saving basics
+            float lat = (float) loc.getLatitude();
+            float lng = (float) loc.getLongitude();
+            long timestamp = loc.getTime();
+            float ele = (float) loc.getAltitude();
+            TrackPoint trackPoint = new TrackPoint(lat,lng,timestamp,ele);
+            //saving basics in DB
+            lastLocationId = Queries.insertLocation(getApplicationContext(),
+                    trackID,
+                    trackPoint.lat,
+                    trackPoint.lng,
+                    trackPoint.timestamp,
+                    trackPoint.ele);
+
+            //saving GPS META
+            float accuracy = loc.getAccuracy();
+            int satcount = (int) loc.getExtras().get("satellites");
+            int toffset = 0;
+            trackPoint.gpsMeta.add(new TrackPoint.GpsMeta(accuracy, satcount, toffset));
+            //saving GPS META in DB
+            Queries.insertGpsMeta(getApplicationContext(),
+                    lastLocationId,
+                    trackPoint.gpsMeta);
+
+            // save positions in queue that gets sent to server at some point
+            signalsNotSent.add(trackPoint);
+
+            // Send to activity to update UI
             intent.putExtra(BROADCAST_LOCATION, loc);
             sendBroadcast(intent);
         }
