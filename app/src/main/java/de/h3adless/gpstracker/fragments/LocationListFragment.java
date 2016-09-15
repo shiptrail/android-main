@@ -32,6 +32,7 @@ import de.h3adless.gpstracker.database.LocationCursorAdapter;
 import de.h3adless.gpstracker.database.Queries;
 import de.h3adless.gpstracker.database.TrackDatabase;
 import de.h3adless.gpstracker.database.TrackDatabaseHelper;
+import de.h3adless.gpstracker.utils.cgps.CgpsWriter;
 import de.h3adless.gpstracker.utils.cgps.TrackPoint;
 
 /**
@@ -65,12 +66,21 @@ public class LocationListFragment extends Fragment {
         sendButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-
+                List<TrackPoint> trackPointList = Queries.getLocationsByTrackID(getContext(), trackID);
+                TrackPoint[] trackPoints = new TrackPoint[trackPointList.size()];
+                trackPoints = trackPointList.toArray(trackPoints);
+                CgpsWriter cgpsWriter = new CgpsWriter(trackPoints);
+                boolean result = cgpsWriter.writeToFile();
+                Toast.makeText(getContext(),
+                        result ? R.string.location_list_fragment_saving_success : R.string.location_list_fragment_saving_failure,
+                        Toast.LENGTH_LONG)
+                        .show();
+/*
                 if (ContextCompat.checkSelfPermission(getActivity(), Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
                     ActivityCompat.requestPermissions(getActivity(), new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, MY_PERMISSIONS_REQUEST_WRITE_EXTERNAL_STORAGE);
                 } else {
                     writeTmpFileAndShare();
-                }
+                }*/
             }
         });
 

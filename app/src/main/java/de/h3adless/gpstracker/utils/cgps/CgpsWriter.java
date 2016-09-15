@@ -6,8 +6,11 @@ import com.google.gson.Gson;
 
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.IOException;
+import java.lang.reflect.Array;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.Locale;
 
@@ -25,7 +28,19 @@ public class CgpsWriter extends CgpsCommon {
 
     public boolean writeToFile() {
         boolean writeWasSuccessful = false;
-        File dir = this.getStorageDirectory();
+        File dir = getStorageDirectory();
+
+        //make sure directory exists
+        if (!dir.exists() && !dir.mkdir()) {
+            return false;
+        }
+        Log.d("CgpsWriter","writing to: " + dir.getAbsolutePath());
+        try {
+            Log.d("CgpsWriter","writing to: " + dir.getCanonicalPath());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
         String lineTerminator = "\n";
 
         this.logName = buildFileName();
