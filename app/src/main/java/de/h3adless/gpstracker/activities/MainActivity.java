@@ -35,6 +35,7 @@ import java.util.UUID;
 
 import de.h3adless.gpstracker.AppSettings;
 import de.h3adless.gpstracker.R;
+import de.h3adless.gpstracker.database.Queries;
 import de.h3adless.gpstracker.database.TrackDatabase;
 import de.h3adless.gpstracker.database.TrackDatabaseHelper;
 import de.h3adless.gpstracker.services.LocationService;
@@ -179,16 +180,12 @@ public class MainActivity extends MainActivityType {
             AppSettings.setRandomDeviceUuid(UUID.randomUUID().toString());
         }
 
-        TrackDatabaseHelper trackDatabaseHelper = TrackDatabaseHelper.getInstance(getApplicationContext());
-        SQLiteDatabase db = trackDatabaseHelper.getWritableDatabase();
-        ContentValues values = new ContentValues();
-
         SimpleDateFormat dateFormat = new SimpleDateFormat("dd.MM.yy - HH:mm:ss", Locale.getDefault());
         Date date = new Date();
         String dateAsString = dateFormat.format(date);
 
-        values.put(TrackDatabase.TrackEntry.COLUMN_NAME_NAME, "Track vom " + dateAsString);
-        long trackId = db.insert(TrackDatabase.TrackEntry.TABLE_NAME, null, values);
+        long trackId = Queries.insertTrack(getApplicationContext(), "Track vom " + dateAsString);
+
         Intent intent = AppSettings.getLocationServiceIntent();
         intent.putExtra(LocationService.TRACK_ID, trackId);
         AppSettings.setLocationServiceIntent(intent);
