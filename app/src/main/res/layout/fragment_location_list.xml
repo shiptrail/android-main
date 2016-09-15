@@ -21,7 +21,7 @@
     <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/send_by_mail"
+        android:text="@string/location_list_Fragment_save_track"
         android:id="@+id/send_button"
         android:layout_gravity="center_horizontal" />
 

@@ -26,6 +26,7 @@ import android.util.Log;
 import android.widget.Toast;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 
 import de.h3adless.gpstracker.R;
 import de.h3adless.gpstracker.AppSettings;
@@ -132,8 +133,8 @@ public class LocationService extends Service {
 
         //registering for sensor data
 
-        sensorManager.registerListener(sensorListener, accelerometer, SensorManager.SENSOR_DELAY_UI);
-        sensorManager.registerListener(sensorListener, magnetometer, SensorManager.SENSOR_DELAY_UI);
+        sensorManager.registerListener(sensorListener, accelerometer, SensorManager.SENSOR_DELAY_NORMAL);
+        sensorManager.registerListener(sensorListener, magnetometer, SensorManager.SENSOR_DELAY_NORMAL);
 
         //register the annotations receiver
         registerReceiver(annotationsReceiver, new IntentFilter(BROADCAST_ANNOTATION));
@@ -192,9 +193,7 @@ public class LocationService extends Service {
         TrackPoint.Annotation annotationData = new TrackPoint.Annotation(annotation, toffsetInt);
         signalsNotSent.get(signalsNotSent.size()-1).annotation.add(annotationData);
         //save annotation to DB
-        ArrayList<TrackPoint.Annotation> annotationDataList = new ArrayList<>(1);
-        annotationDataList.add(annotationData);
-        Queries.insertAnnotation(getApplicationContext(), lastLocationId, annotationDataList);
+        Queries.insertAnnotation(getApplicationContext(), lastLocationId, annotationData);
     }
 
     public class MySensorEventListener implements SensorEventListener {
@@ -215,6 +214,7 @@ public class LocationService extends Service {
                     mGravity = event.values.clone();
                 if (event.sensor.getType() == Sensor.TYPE_MAGNETIC_FIELD)
                     mGeomagnetic = event.values.clone();
+                //TODO Compass data here. event.values should have x,y and z data in [0],[1] and [2]
                 if (mGravity != null && mGeomagnetic != null) {
                     float R[] = new float[9];
                     float I[] = new float[9];
@@ -222,9 +222,17 @@ public class LocationService extends Service {
                     if (success) {
                         float orientation[] = new float[3];
                         SensorManager.getOrientation(R, orientation);
-                        float azimuth =  (float) Math.toDegrees(orientation[0]);
-                        float pitch = (float) Math.toDegrees(orientation[1]);
-                        float roll = (float) Math.toDegrees(orientation[2]);
+
+                        float azimuth = orientation[0] * (180 / (float) Math.PI);
+                        float compass = azimuth;
+                        if (azimuth < 0){
+                            compass = 360+azimuth;
+                        } else if (azimuth >= 360) {
+                            compass = azimuth-360;
+                        }
+
+                        float pitch = orientation[1]* (180 / (float) Math.PI);
+                        float roll = orientation[2]* (180 / (float) Math.PI);
 
                         //save ORIENTATION data
                         long toffset = current - signalsNotSent.get(signalsNotSent.size()-1).timestamp;
@@ -232,12 +240,28 @@ public class LocationService extends Service {
                         if (toffset < Integer.MAX_VALUE && toffset > Integer.MIN_VALUE) {
                             toffsetInteger = (int) toffset;
                         }
-                        TrackPoint.Orientation orientationData = new TrackPoint.Orientation(azimuth,pitch,roll,toffsetInteger);
+                        TrackPoint.Orientation orientationData = new TrackPoint.Orientation(compass,pitch,roll,toffsetInteger);
                         signalsNotSent.get(signalsNotSent.size()-1).orientation.add(orientationData);
                         //save ORIENTATION data to DB
-                        ArrayList<TrackPoint.Orientation> orientationDataList = new ArrayList<>(1);
-                        orientationDataList.add(orientationData);
-                        Queries.insertOrientation(getApplicationContext(), lastLocationId, orientationDataList);
+                        Queries.insertOrientation(getApplicationContext(), lastLocationId, orientationData);
+
+                        //acceleration
+                        float x = mGravity[0];
+                        float y = mGravity[1];
+                        float z = mGravity[2];
+
+                        //save acceleration
+                        TrackPoint.Accelerometer accelerometerData = new TrackPoint.Accelerometer(x,y,z,toffsetInteger);
+                        signalsNotSent.get(signalsNotSent.size()-1).accelerometer.add(accelerometerData);
+                        //save accelerometer to DB
+                        Queries.insertAcceleration(getApplicationContext(), lastLocationId, accelerometerData);
+
+                        //save compass
+                        TrackPoint.Compass compassData = new TrackPoint.Compass(compass, toffsetInteger);
+                        signalsNotSent.get(signalsNotSent.size()-1).compass.add(compassData);
+                        //save compass to DB
+                        Queries.insertCompass(getApplicationContext(), lastLocationId, compassData);
+
 
                         //determine when the next sensor data shall be monitored
                         nextTimestampToSave += AppSettings.getTrackingInterval()/10;
@@ -293,11 +317,12 @@ public class LocationService extends Service {
             float accuracy = loc.getAccuracy();
             int satcount = (int) loc.getExtras().get("satellites");
             int toffset = 0;
-            trackPoint.gpsMeta.add(new TrackPoint.GpsMeta(accuracy, satcount, toffset));
+            TrackPoint.GpsMeta gpsMeta = new TrackPoint.GpsMeta(accuracy, satcount, toffset);
+            trackPoint.gpsMeta.add(gpsMeta);
             //saving GPS META in DB
             Queries.insertGpsMeta(getApplicationContext(),
                     lastLocationId,
-                    trackPoint.gpsMeta);
+                    gpsMeta);
 
             // save positions in queue that gets sent to server at some point
             signalsNotSent.add(trackPoint);

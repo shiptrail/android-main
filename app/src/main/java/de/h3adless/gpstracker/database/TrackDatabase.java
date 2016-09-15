@@ -49,7 +49,7 @@ public class TrackDatabase {
     // ##### GPS_META - TABLE #####
 
     public static abstract class GpsMetaEntry extends MetaEntry {
-        public static String TABLE_NAME = "gps_meta";
+        public static final String TABLE_NAME = "gps_meta";
         public static final String COLUMN_NAME_ACCURACY = "accuracy";
         public static final String COLUMN_NAME_SATCOUNT = "satcount";
 
