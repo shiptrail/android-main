@@ -53,4 +53,8 @@
 
     <string name="activity_main_toast_annotation_clicked">Annotation %1$s added</string>
 
+    <string name="location_list_fragment_saving_success">Speichern war erfolgreich.</string>
+    <string name="location_list_fragment_saving_failure">Speichern ist fehlgeschlagen.</string>
+    <string name="location_list_Fragment_save_track">Track Speichern</string>
+
 </resources>
