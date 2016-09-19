@@ -43,6 +43,8 @@
     <string name="no">nein</string>
     <string name="certificate_failed_title">Zertifikat-Problem</string>
     <string name="certificate_failed">Das Zertifikat der Website konnte nicht akzeptiert werden. Manuell akzeptieren? (Falls nein, werden die Einstellungen automatisch so geändert, dass keine Daten mehr an den Server geschickt werden.) \n\n %1$s</string>
+    <string name="http_request_failed_title">Verbindungsproblem</string>
+    <string name="http_request_failed">Es gab ein Verbindungsproblem. Soll versucht werden, die Daten erneut zu übermitteln? Die Daten wurden bereits auf dem Smartphone gespeichert. Folgende Fehlermeldung wurde erhalten: \n\n %1$s</string>
 
     <string name="activity_main_button_jibe_start">Start Jibe</string>
     <string name="activity_main_button_jibe_middle">Middle Jibe</string>
@@ -56,5 +58,9 @@
     <string name="location_list_fragment_saving_success">Speichern war erfolgreich.</string>
     <string name="location_list_fragment_saving_failure">Speichern ist fehlgeschlagen.</string>
     <string name="location_list_Fragment_save_track">Track Speichern</string>
+
+    <string name="connection_changed">Der Netzwerkstatus hat sich geändert. Jetzt: %1$s</string>
+    <string name="online">Online</string>
+    <string name="offline">Offline</string>
 
 </resources>

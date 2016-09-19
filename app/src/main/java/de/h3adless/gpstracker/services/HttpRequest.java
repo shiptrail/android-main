@@ -119,24 +119,9 @@ public class HttpRequest extends AsyncTask<TrackPoint, Integer, Void> {
             out.flush();
             out.close();
 
-            // TODO retry?
             int responseCode = connection.getResponseCode();
 
             Log.d("HttpRequest", "ResponseCode: " + responseCode);
-
-            //TODO read input?
-            /*
-            BufferedReader in = new BufferedReader(new InputStreamReader(
-                    connection.getInputStream()));
-
-            String answer = "";
-            String read;
-            while ((read = in.readLine()) != null) {
-                answer += read;
-            }
-            in.close();
-            //do stuff with answer
-            */
 
             connection.disconnect();
 
@@ -147,23 +132,38 @@ public class HttpRequest extends AsyncTask<TrackPoint, Integer, Void> {
             //für Informationen siehe https://developer.android.com/training/articles/security-ssl.html
             //allgemeine HTTPS Probleme/manuelles Akzeptieren vom Zert. gescheitert: HTTP Probieren-Dialog.
             //bestimmter Fehler, in dem das Zertifikat nicht akzeptiert wurde: anderer Dialog
-            if (AppSettings.getUseHttps())
+            if (AppSettings.getUseHttps()) {
                 if ((e instanceof SSLException)
                             || (e.getMessage().contains("cannot be cast to javax.net.ssl.HttpsURLConnection"))
                             || (AppSettings.getCustomAcceptedCertificates().containsKey(AppSettings.getCustomServerUrl()))
                     ) {
                     makeHttpsDialog(locations);
+                    return null;
                 } else if (e.getMessage().startsWith("Hostname")
                         && e.getMessage().contains("was not verified")) {
                     makeCertificateDialog(locations);
+                    return null;
+                }
             }
-            //TODO ansonsten weitere Fehlerbehebung.
+
+            makeRetryDialog(e.getLocalizedMessage(), locations);
+
             return null;
         } finally {
             if (BuildConfig.DEBUG) {
                 TrafficStats.clearThreadStatsTag();
             }
         }
+    }
+
+    private void makeRetryDialog(String errorMsg, final TrackPoint... locations) {
+        Intent intent = new Intent(context, MainActivity.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        intent.putExtra(AppSettings.INTENT_START_RETRY_DIALOG, true);
+        intent.putExtra(AppSettings.INTENT_START_DIALOG_PARAMS, locations);
+        intent.putExtra(AppSettings.INTENT_START_RETRY_DIALOG_PARAMS, errorMsg);
+
+        context.startActivity(intent);
     }
 
     private void makeCertificateDialog(final TrackPoint... locations) {
