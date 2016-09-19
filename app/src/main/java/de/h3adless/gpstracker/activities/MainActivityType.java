@@ -30,12 +30,33 @@ public class MainActivityType extends AppCompatActivity {
 			final TrackPoint[] locations = (TrackPoint[]) intent.getSerializableExtra(AppSettings.INTENT_START_DIALOG_PARAMS);
 			final Certificate[] certificates = (Certificate[]) intent.getSerializableExtra(AppSettings.INTENT_START_CERTIFICATE_DIALOG_CERTIFICATES);
 			showCertificateDialog(certificates, locations);
+		} else if (intent.getBooleanExtra(AppSettings.INTENT_START_RETRY_DIALOG, false)) {
+			final TrackPoint[] locations = (TrackPoint[]) intent.getSerializableExtra(AppSettings.INTENT_START_DIALOG_PARAMS);
+			final String errorMsg = intent.getStringExtra(AppSettings.INTENT_START_RETRY_DIALOG_PARAMS);
+			showRetryDialog(errorMsg, locations);
 		}
 
 		//so we dont show dialog again
 		intent.putExtra(AppSettings.INTENT_START_HTTPS_DIALOG, false);
 		intent.putExtra(AppSettings.INTENT_START_CERTIFICATE_DIALOG, false);
+		intent.putExtra(AppSettings.INTENT_START_RETRY_DIALOG, false);
 		setIntent(intent);
+	}
+
+	public void showRetryDialog(final String errorMsg, final TrackPoint... locations) {
+		AlertDialog.Builder builder = new AlertDialog.Builder(this);
+		builder.setTitle(R.string.http_request_failed_title);
+		builder.setMessage(getString(R.string.http_request_failed, errorMsg));
+		builder.setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
+			@Override
+			public void onClick(DialogInterface dialogInterface, int i) {
+				HttpRequest httpRequest = new HttpRequest(MainActivityType.this);
+				httpRequest.execute(locations);
+				dialogInterface.dismiss();
+			}
+		});
+		builder.setNegativeButton(R.string.no, null);
+		builder.show();
 	}
 
 	public void showCertificateDialog(final Certificate[] certificates, final TrackPoint... locations) {
