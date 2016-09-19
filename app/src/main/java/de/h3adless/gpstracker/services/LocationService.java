@@ -17,7 +17,8 @@ import android.hardware.SensorManager;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
-import android.os.Binder;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.support.v4.app.ActivityCompat;
@@ -26,13 +27,11 @@ import android.util.Log;
 import android.widget.Toast;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 
 import de.h3adless.gpstracker.R;
 import de.h3adless.gpstracker.AppSettings;
 import de.h3adless.gpstracker.activities.MainActivity;
 import de.h3adless.gpstracker.database.Queries;
-import de.h3adless.gpstracker.database.TrackDatabaseHelper;
 import de.h3adless.gpstracker.utils.cgps.TrackPoint;
 
 /**
@@ -65,7 +64,12 @@ public class LocationService extends Service {
     private static long currentTrack = -1;
 
     private ArrayList<TrackPoint> signalsNotSent = new ArrayList<>();
-    private int lastLocationId = -1;
+    private ArrayList<Long> locationIdsNotSent = new ArrayList<>();
+    private long lastLocationId = -1;
+
+    //stuff for knowing if we are online or not
+    private ConnectionChangeReceiver connectionChangeReceiver;
+    public boolean isOnline;
 
     private BroadcastReceiver annotationsReceiver = new BroadcastReceiver() {
         @Override
@@ -108,6 +112,8 @@ public class LocationService extends Service {
         magnetometer = sensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD);
 
         intent = new Intent(BROADCAST_ACTION);
+
+        connectionChangeReceiver = new ConnectionChangeReceiver();
     }
 
     @Override
@@ -139,6 +145,10 @@ public class LocationService extends Service {
         //register the annotations receiver
         registerReceiver(annotationsReceiver, new IntentFilter(BROADCAST_ANNOTATION));
 
+        //register for network change status to know if we are online
+        connectionChangeReceiver.checkOnline();
+        registerReceiver(connectionChangeReceiver, new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION));
+
         return START_REDELIVER_INTENT;
     }
 
@@ -165,12 +175,19 @@ public class LocationService extends Service {
         //unregister annotations receiver
         unregisterReceiver(annotationsReceiver);
 
+        //unregister connectivity receiver
+        unregisterReceiver(connectionChangeReceiver);
+
         //send all data we didnt send yet!
         if (signalsNotSent.size() > 0) {
             HttpRequest httpRequest = new HttpRequest(LocationService.this);
+            httpRequest.locationIds = (ArrayList<Long>) locationIdsNotSent.clone();
+            httpRequest.trackId = trackID;
             TrackPoint[] parameters = new TrackPoint[signalsNotSent.size()];
             signalsNotSent.toArray(parameters);
             httpRequest.execute(parameters);
+            locationIdsNotSent.clear();
+            signalsNotSent.clear();
         }
     }
 
@@ -195,6 +212,31 @@ public class LocationService extends Service {
         //save annotation to DB
         Queries.insertAnnotation(getApplicationContext(), lastLocationId, annotationData);
     }
+
+
+    /**
+     * source:
+     * https://developer.android.com/training/basics/network-ops/managing.html
+     * and http://stackoverflow.com/questions/1783117/network-listener-android
+     */
+    public class ConnectionChangeReceiver extends BroadcastReceiver
+    {
+        @Override
+        public void onReceive( Context context, Intent intent )
+        {
+            checkOnline();
+        }
+
+        public void checkOnline() {
+            ConnectivityManager connectivityManager = (ConnectivityManager) getSystemService( Context.CONNECTIVITY_SERVICE );
+            NetworkInfo networkInfo = connectivityManager.getActiveNetworkInfo();
+            isOnline = (networkInfo != null && networkInfo.isConnected());
+            Toast.makeText(LocationService.this,
+                    getString(R.string.connection_changed, isOnline ? getString(R.string.online) : getString(R.string.offline)),
+                    Toast.LENGTH_SHORT).show();
+        }
+    }
+
 
     public class MySensorEventListener implements SensorEventListener {
 
@@ -289,11 +331,17 @@ public class LocationService extends Service {
             //to the list, but only send it if we have the correct settings.
             if (AppSettings.getSendTracksToServer()) {
                 if (signalsNotSent.size() >= AppSettings.getSendTogether()) {
-                    HttpRequest httpRequest = new HttpRequest(LocationService.this);
-                    TrackPoint[] parameters = new TrackPoint[signalsNotSent.size()];
-                    signalsNotSent.toArray(parameters);
-                    httpRequest.execute(parameters);
-                    signalsNotSent.clear();
+                    //check if we are online to send data
+                    if (isOnline) {
+                        HttpRequest httpRequest = new HttpRequest(LocationService.this);
+                        httpRequest.locationIds = (ArrayList<Long>) locationIdsNotSent.clone();
+                        httpRequest.trackId = trackID;
+                        TrackPoint[] parameters = new TrackPoint[signalsNotSent.size()];
+                        signalsNotSent.toArray(parameters);
+                        httpRequest.execute(parameters);
+                        locationIdsNotSent.clear();
+                        signalsNotSent.clear();
+                    }
                 }
             }
 
@@ -326,6 +374,7 @@ public class LocationService extends Service {
 
             // save positions in queue that gets sent to server at some point
             signalsNotSent.add(trackPoint);
+            locationIdsNotSent.add(lastLocationId);
 
             // Send to activity to update UI
             intent.putExtra(BROADCAST_LOCATION, loc);

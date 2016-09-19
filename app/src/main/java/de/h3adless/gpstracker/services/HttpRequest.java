@@ -14,6 +14,7 @@ import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.security.cert.Certificate;
+import java.util.ArrayList;
 import java.util.Arrays;
 
 import javax.net.ssl.HostnameVerifier;
@@ -26,6 +27,8 @@ import de.h3adless.gpstracker.AppSettings;
 import de.h3adless.gpstracker.BuildConfig;
 import de.h3adless.gpstracker.R;
 import de.h3adless.gpstracker.activities.MainActivity;
+import de.h3adless.gpstracker.database.Queries;
+import de.h3adless.gpstracker.database.TrackDatabase;
 import de.h3adless.gpstracker.utils.cgps.TrackPoint;
 
 /**
@@ -40,6 +43,9 @@ public class HttpRequest extends AsyncTask<TrackPoint, Integer, Void> {
 
     Context context;
     private Certificate[] certificates = null;
+
+    public ArrayList<Long> locationIds = new ArrayList<>();
+    public long trackId;
 
     public HttpRequest( Context context) {
         this.context = context;
@@ -111,6 +117,9 @@ public class HttpRequest extends AsyncTask<TrackPoint, Integer, Void> {
             String json = gson.toJson(locations);
 
             Log.d("HttpRequest", "Parameter to send: " + json);
+            for (TrackPoint tp : locations) {
+                Log.d("HttpRequest","sending trackpoint timestamp: " + tp.timestamp);
+            }
 
             BufferedWriter out = new BufferedWriter(new OutputStreamWriter(
                     connection.getOutputStream()));
@@ -119,27 +128,11 @@ public class HttpRequest extends AsyncTask<TrackPoint, Integer, Void> {
             out.flush();
             out.close();
 
-            // TODO retry?
             int responseCode = connection.getResponseCode();
 
             Log.d("HttpRequest", "ResponseCode: " + responseCode);
 
-            //TODO read input?
-            /*
-            BufferedReader in = new BufferedReader(new InputStreamReader(
-                    connection.getInputStream()));
-
-            String answer = "";
-            String read;
-            while ((read = in.readLine()) != null) {
-                answer += read;
-            }
-            in.close();
-            //do stuff with answer
-            */
-
             connection.disconnect();
-
             return null;
         } catch (IOException e) {
             e.printStackTrace();
@@ -147,17 +140,22 @@ public class HttpRequest extends AsyncTask<TrackPoint, Integer, Void> {
             //für Informationen siehe https://developer.android.com/training/articles/security-ssl.html
             //allgemeine HTTPS Probleme/manuelles Akzeptieren vom Zert. gescheitert: HTTP Probieren-Dialog.
             //bestimmter Fehler, in dem das Zertifikat nicht akzeptiert wurde: anderer Dialog
-            if (AppSettings.getUseHttps())
+            if (AppSettings.getUseHttps()) {
                 if ((e instanceof SSLException)
                             || (e.getMessage().contains("cannot be cast to javax.net.ssl.HttpsURLConnection"))
                             || (AppSettings.getCustomAcceptedCertificates().containsKey(AppSettings.getCustomServerUrl()))
                     ) {
-                    makeHttpsDialog(locations);
+                    makeHttpsDialog();
+                    return null;
                 } else if (e.getMessage().startsWith("Hostname")
                         && e.getMessage().contains("was not verified")) {
-                    makeCertificateDialog(locations);
+                    makeCertificateDialog();
+                    return null;
+                }
             }
-            //TODO ansonsten weitere Fehlerbehebung.
+
+            makeRetryDialog(e.getLocalizedMessage());
+
             return null;
         } finally {
             if (BuildConfig.DEBUG) {
@@ -166,21 +164,49 @@ public class HttpRequest extends AsyncTask<TrackPoint, Integer, Void> {
         }
     }
 
-    private void makeCertificateDialog(final TrackPoint... locations) {
+    private void makeRetryDialog(String errorMsg) {
+        //insert into DB that request for these locations failed
+        if (locationIds.size() > 0) {
+            Queries.insertFailedRequests(context, locationIds, TrackDatabase.FailedRequestsEntry.TYPE_OTHER);
+        }
+
+        //tell mainactivity to show dialog
         Intent intent = new Intent(context, MainActivity.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
-        intent.putExtra(AppSettings.INTENT_START_CERTIFICATE_DIALOG, true);
-        intent.putExtra(AppSettings.INTENT_START_DIALOG_PARAMS, locations);
-        intent.putExtra(AppSettings.INTENT_START_CERTIFICATE_DIALOG_CERTIFICATES, certificates);
+        intent.putExtra(AppSettings.INTENT_START_RETRY_DIALOG, true);
+        intent.putExtra(AppSettings.INTENT_START_DIALOG_PARAMS, errorMsg);
+        intent.putExtra(AppSettings.INTENT_START_DIALOG_TRACKID, trackId);
 
         context.startActivity(intent);
     }
 
-    private void makeHttpsDialog(final TrackPoint... locations) {
+    private void makeCertificateDialog() {
+        //insert into DB that request for these locations failed
+        if (locationIds.size() > 0) {
+            Queries.insertFailedRequests(context, locationIds, TrackDatabase.FailedRequestsEntry.TYPE_CERTIFICATE);
+        }
+
+        //tell mainactivity to show dialog
+        Intent intent = new Intent(context, MainActivity.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        intent.putExtra(AppSettings.INTENT_START_CERTIFICATE_DIALOG, true);
+        intent.putExtra(AppSettings.INTENT_START_DIALOG_PARAMS, certificates);
+        intent.putExtra(AppSettings.INTENT_START_DIALOG_TRACKID, trackId);
+
+        context.startActivity(intent);
+    }
+
+    private void makeHttpsDialog() {
+        //insert into DB that request for these locations failed
+        if (locationIds.size() > 0) {
+            Queries.insertFailedRequests(context, locationIds, TrackDatabase.FailedRequestsEntry.TYPE_HTTPS);
+        }
+
+        //tell mainactivity to show dialog
         Intent intent = new Intent(context, MainActivity.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
         intent.putExtra(AppSettings.INTENT_START_HTTPS_DIALOG, true);
-        intent.putExtra(AppSettings.INTENT_START_DIALOG_PARAMS, locations);
+        intent.putExtra(AppSettings.INTENT_START_DIALOG_TRACKID, trackId);
 
         context.startActivity(intent);
     }

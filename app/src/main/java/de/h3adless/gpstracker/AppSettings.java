@@ -27,7 +27,9 @@ public class AppSettings extends Application {
 
     public static final String INTENT_START_HTTPS_DIALOG = "start_https_dialog";
     public static final String INTENT_START_CERTIFICATE_DIALOG = "start_certificate_dialog";
-    public static final String INTENT_START_CERTIFICATE_DIALOG_CERTIFICATES = "start_certificate_dialog_certificates";
+    public static final String INTENT_START_RETRY_DIALOG = "start_retry_dialog";
+
+    public static final String INTENT_START_DIALOG_TRACKID = "start_retry_dialog_trackid";
     public static final String INTENT_START_DIALOG_PARAMS = "start_dialog_params";
 
 

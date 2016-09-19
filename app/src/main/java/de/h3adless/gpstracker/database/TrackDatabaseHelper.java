@@ -35,6 +35,7 @@ public class TrackDatabaseHelper extends SQLiteOpenHelper {
         db.execSQL(TrackDatabase.CompassEntry.SQL_CREATE_COMPASS_TABLE);
         db.execSQL(TrackDatabase.OrientationEntry.SQL_CREATE_ORIENTATION_TABLE);
         db.execSQL(TrackDatabase.AnnotationEntry.SQL_CREATE_ANNOTATION_TABLE);
+        db.execSQL(TrackDatabase.FailedRequestsEntry.SQL_CREATE_REQUESTS_FAILED_TABLE);
     }
 
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
@@ -48,6 +49,7 @@ public class TrackDatabaseHelper extends SQLiteOpenHelper {
         db.execSQL(TrackDatabase.CompassEntry.SQL_DELETE_COMPASS_TABLE);
         db.execSQL(TrackDatabase.OrientationEntry.SQL_DELETE_ORIENTATION_TABLE);
         db.execSQL(TrackDatabase.AnnotationEntry.SQL_DELETE_ANNOTATION_TABLE);
+        db.execSQL(TrackDatabase.FailedRequestsEntry.SQL_DELETE_REQUESTS_FAILED_TABLE);
         onCreate(db);
     }
 

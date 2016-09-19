@@ -4,6 +4,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.support.test.rule.ActivityTestRule;
 import android.support.test.runner.AndroidJUnit4;
 
+
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
@@ -53,7 +54,7 @@ public class DatabaseTest {
 
 	private TrackPoint trackPoint;
 	private MainActivity mainActivity;
-	private int locationId;
+	private long locationId;
 
 	private boolean trackPointsAreEqual(TrackPoint one, TrackPoint two) {
 		return one.lat == two.lat &&
