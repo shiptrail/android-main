@@ -4,6 +4,11 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.util.Log;
+
+import com.google.gson.Gson;
+
+import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -104,7 +109,7 @@ public class Queries {
         return locs;
     }
 
-    public static List<TrackPoint.GpsMeta> getGpsMetaByLocationID(Context context, int locationID) {
+    public static List<TrackPoint.GpsMeta> getGpsMetaByLocationID(Context context, long locationID) {
         SQLiteDatabase database = TrackDatabaseHelper.getInstance(context).getReadableDatabase();
 
         String sql = "SELECT " +
@@ -133,7 +138,7 @@ public class Queries {
         return gpsMetas;
     }
 
-    public static List<TrackPoint.Compass> getCompassByLocationID(Context context, int locationID) {
+    public static List<TrackPoint.Compass> getCompassByLocationID(Context context, long locationID) {
         SQLiteDatabase database = TrackDatabaseHelper.getInstance(context).getReadableDatabase();
 
         String sql = "SELECT " +
@@ -160,7 +165,7 @@ public class Queries {
         return compasses;
     }
 
-    public static List<TrackPoint.Accelerometer> getAccelerometerByLocationID(Context context, int locationID) {
+    public static List<TrackPoint.Accelerometer> getAccelerometerByLocationID(Context context, long locationID) {
         SQLiteDatabase database = TrackDatabaseHelper.getInstance(context).getReadableDatabase();
 
         String sql = "SELECT " +
@@ -191,7 +196,7 @@ public class Queries {
         return accelerometers;
     }
 
-    public static List<TrackPoint.Orientation> getOrientationByLocationID(Context context, int locationID) {
+    public static List<TrackPoint.Orientation> getOrientationByLocationID(Context context, long locationID) {
         SQLiteDatabase database = TrackDatabaseHelper.getInstance(context).getReadableDatabase();
 
         String sql = "SELECT " +
@@ -222,7 +227,7 @@ public class Queries {
         return orientations;
     }
 
-    public static List<TrackPoint.Annotation> getAnnotationByLocationID(Context context, int locationID) {
+    public static List<TrackPoint.Annotation> getAnnotationByLocationID(Context context, long locationID) {
         SQLiteDatabase database = TrackDatabaseHelper.getInstance(context).getReadableDatabase();
 
         String sql = "SELECT " +
@@ -249,7 +254,7 @@ public class Queries {
         return annotations;
     }
 
-    public static int insertLocation(Context context, long trackID, float lat, float lng, long timestamp, float ele) {
+    public static long insertLocation(Context context, long trackID, float lat, float lng, long timestamp, float ele) {
         SQLiteDatabase database = TrackDatabaseHelper.getInstance(context).getWritableDatabase();
         ContentValues values = new ContentValues();
         values.put(TrackDatabase.LocationEntry.COLUMN_NAME_TRACK_ID, trackID);
@@ -257,71 +262,145 @@ public class Queries {
         values.put(TrackDatabase.LocationEntry.COLUMN_NAME_LNG, lng);
         values.put(TrackDatabase.LocationEntry.COLUMN_NAME_TIMESTAMP, timestamp);
         values.put(TrackDatabase.LocationEntry.COLUMN_NAME_ELE, ele);
-        long id = database.insert(TrackDatabase.LocationEntry.TABLE_NAME, null, values);
-        if (id > Integer.MAX_VALUE) {
-            return -1;
-        } else {
-            return (int) id;
-        }
+        return database.insert(TrackDatabase.LocationEntry.TABLE_NAME, null, values);
     }
 
-    public static void insertGpsMeta(Context context, int locationID, TrackPoint.GpsMeta... gpsMetas) {
+    public static void insertGpsMeta(Context context, long locationID, TrackPoint.GpsMeta... gpsMetas) {
         SQLiteDatabase database = TrackDatabaseHelper.getInstance(context).getWritableDatabase();
         ContentValues values = new ContentValues();
+        values.put(TrackDatabase.GpsMetaEntry.COLUMN_NAME_LOCATION_ID, locationID);
         for (TrackPoint.GpsMeta gpsMeta : gpsMetas) {
-            values.put(TrackDatabase.GpsMetaEntry.COLUMN_NAME_LOCATION_ID, locationID);
             values.put(TrackDatabase.GpsMetaEntry.COLUMN_NAME_TOFFSET, gpsMeta.toffset);
             values.put(TrackDatabase.GpsMetaEntry.COLUMN_NAME_ACCURACY, gpsMeta.accuracy);
             values.put(TrackDatabase.GpsMetaEntry.COLUMN_NAME_SATCOUNT, gpsMeta.satCount);
+            database.insert(TrackDatabase.GpsMetaEntry.TABLE_NAME, null, values);
         }
-        database.insert(TrackDatabase.GpsMetaEntry.TABLE_NAME, null, values);
     }
 
-    public static void insertOrientation(Context context, int locationID, TrackPoint.Orientation... orientations) {
+    public static void insertOrientation(Context context, long locationID, TrackPoint.Orientation... orientations) {
         SQLiteDatabase database = TrackDatabaseHelper.getInstance(context).getWritableDatabase();
         ContentValues values = new ContentValues();
+        values.put(TrackDatabase.OrientationEntry.COLUMN_NAME_LOCATION_ID, locationID);
         for (TrackPoint.Orientation orientation : orientations) {
-            values.put(TrackDatabase.OrientationEntry.COLUMN_NAME_LOCATION_ID, locationID);
             values.put(TrackDatabase.OrientationEntry.COLUMN_NAME_TOFFSET, orientation.toffset);
             values.put(TrackDatabase.OrientationEntry.COLUMN_NAME_AZIMUTH, orientation.azimuth);
             values.put(TrackDatabase.OrientationEntry.COLUMN_NAME_PITCH, orientation.pitch);
             values.put(TrackDatabase.OrientationEntry.COLUMN_NAME_ROLL, orientation.roll);
+            database.insert(TrackDatabase.OrientationEntry.TABLE_NAME, null, values);
         }
-        database.insert(TrackDatabase.OrientationEntry.TABLE_NAME, null, values);
     }
 
-    public static void insertAnnotation(Context context, int locationID, TrackPoint.Annotation... annotations) {
+    public static void insertAnnotation(Context context, long locationID, TrackPoint.Annotation... annotations) {
         SQLiteDatabase database = TrackDatabaseHelper.getInstance(context).getWritableDatabase();
         ContentValues values = new ContentValues();
+        values.put(TrackDatabase.AnnotationEntry.COLUMN_NAME_LOCATION_ID, locationID);
         for (TrackPoint.Annotation annotation : annotations) {
-            values.put(TrackDatabase.AnnotationEntry.COLUMN_NAME_LOCATION_ID, locationID);
             values.put(TrackDatabase.AnnotationEntry.COLUMN_NAME_TOFFSET, annotation.toffset);
             values.put(TrackDatabase.AnnotationEntry.COLUMN_NAME_TYPE, annotation.type);
+            database.insert(TrackDatabase.AnnotationEntry.TABLE_NAME, null, values);
         }
-        database.insert(TrackDatabase.AnnotationEntry.TABLE_NAME, null, values);
     }
 
-    public static void insertAcceleration(Context context, int locationID, TrackPoint.Accelerometer... accelerometers) {
+    public static void insertAcceleration(Context context, long locationID, TrackPoint.Accelerometer... accelerometers) {
         SQLiteDatabase database = TrackDatabaseHelper.getInstance(context).getWritableDatabase();
         ContentValues values = new ContentValues();
+        values.put(TrackDatabase.AccelerometerEntry.COLUMN_NAME_LOCATION_ID, locationID);
         for (TrackPoint.Accelerometer accelerometer : accelerometers) {
-            values.put(TrackDatabase.AccelerometerEntry.COLUMN_NAME_LOCATION_ID, locationID);
             values.put(TrackDatabase.AccelerometerEntry.COLUMN_NAME_TOFFSET, accelerometer.toffset);
             values.put(TrackDatabase.AccelerometerEntry.COLUMN_NAME_X, accelerometer.x);
             values.put(TrackDatabase.AccelerometerEntry.COLUMN_NAME_Y, accelerometer.y);
             values.put(TrackDatabase.AccelerometerEntry.COLUMN_NAME_Z, accelerometer.z);
+            database.insert(TrackDatabase.AccelerometerEntry.TABLE_NAME, null, values);
         }
-        database.insert(TrackDatabase.AccelerometerEntry.TABLE_NAME, null, values);
     }
 
-    public static void insertCompass(Context context, int locationID, TrackPoint.Compass... compasses) {
+    public static void insertCompass(Context context, long locationID, TrackPoint.Compass... compasses) {
         SQLiteDatabase database = TrackDatabaseHelper.getInstance(context).getWritableDatabase();
         ContentValues values = new ContentValues();
+        values.put(TrackDatabase.CompassEntry.COLUMN_NAME_LOCATION_ID, locationID);
         for (TrackPoint.Compass compass : compasses) {
-            values.put(TrackDatabase.CompassEntry.COLUMN_NAME_LOCATION_ID, locationID);
             values.put(TrackDatabase.CompassEntry.COLUMN_NAME_TOFFSET, compass.toffset);
             values.put(TrackDatabase.CompassEntry.COLUMN_NAME_DEG, compass.deg);
+            database.insert(TrackDatabase.CompassEntry.TABLE_NAME, null, values);
         }
-        database.insert(TrackDatabase.CompassEntry.TABLE_NAME, null, values);
+    }
+
+    public static void insertFailedRequests(Context context, List<Long> locationIDs, int type) {
+        SQLiteDatabase database = TrackDatabaseHelper.getInstance(context).getWritableDatabase();
+        ContentValues values = new ContentValues();
+        values.put(TrackDatabase.FailedRequestsEntry.COLUMN_NAME_TYPE, type);
+        for (Long locationID : locationIDs) {
+            values.put(TrackDatabase.FailedRequestsEntry.COLUMN_NAME_LOCATION_ID, locationID);
+            database.insert(TrackDatabase.FailedRequestsEntry.TABLE_NAME, null, values);
+        }
+    }
+
+    public static ArrayList<Long> getFailedRequestLocationIdsByTrackIdAndType(Context context, long trackID, int type) {
+        SQLiteDatabase database = TrackDatabaseHelper.getInstance(context).getWritableDatabase();
+        String sql = "SELECT " + TrackDatabase.FailedRequestsEntry.TABLE_NAME + "." + TrackDatabase.FailedRequestsEntry.COLUMN_NAME_LOCATION_ID
+                + " FROM " + TrackDatabase.FailedRequestsEntry.TABLE_NAME
+                + " INNER JOIN " + TrackDatabase.LocationEntry.TABLE_NAME
+                + " ON " + TrackDatabase.FailedRequestsEntry.TABLE_NAME + "." + TrackDatabase.FailedRequestsEntry.COLUMN_NAME_LOCATION_ID
+                + " = " + TrackDatabase.LocationEntry.TABLE_NAME + "." + TrackDatabase.LocationEntry._ID
+                + " WHERE " + TrackDatabase.LocationEntry.TABLE_NAME + "." + TrackDatabase.LocationEntry.COLUMN_NAME_TRACK_ID
+                + " = ?"
+                + " AND " + TrackDatabase.FailedRequestsEntry.TABLE_NAME + "." + TrackDatabase.FailedRequestsEntry.COLUMN_NAME_TYPE
+                + " = ?;";
+        String[] params = new String[] {String.valueOf(trackID), String.valueOf(type)};
+        Cursor c = database.rawQuery(sql, params);
+        ArrayList<Long> locationIds = new ArrayList<>();
+        if (!c.moveToFirst()) {
+            c.close();
+            return locationIds;
+        }
+        do {
+            locationIds.add(c.getLong(c.getColumnIndex(TrackDatabase.FailedRequestsEntry.COLUMN_NAME_LOCATION_ID)));
+        } while (c.moveToNext());
+        c.close();
+        return locationIds;
+    }
+
+    public static void deleteFailedRequestsByTrackIdAndType(Context context, long trackID, int type) {
+        SQLiteDatabase database = TrackDatabaseHelper.getInstance(context).getWritableDatabase();
+        String sql = "DELETE "
+                + " FROM " + TrackDatabase.FailedRequestsEntry.TABLE_NAME
+                + " WHERE " + TrackDatabase.FailedRequestsEntry.COLUMN_NAME_TYPE
+                + " = ?"
+                + " AND " + TrackDatabase.FailedRequestsEntry.COLUMN_NAME_LOCATION_ID
+                + " IN ( SELECT " + TrackDatabase.FailedRequestsEntry.TABLE_NAME + "." + TrackDatabase.FailedRequestsEntry.COLUMN_NAME_LOCATION_ID
+                + " FROM " + TrackDatabase.FailedRequestsEntry.TABLE_NAME
+                + " INNER JOIN " + TrackDatabase.LocationEntry.TABLE_NAME
+                + " ON " + TrackDatabase.FailedRequestsEntry.TABLE_NAME + "." + TrackDatabase.FailedRequestsEntry.COLUMN_NAME_LOCATION_ID
+                + " = " + TrackDatabase.LocationEntry.TABLE_NAME + "." + TrackDatabase.LocationEntry._ID
+                + " WHERE " + TrackDatabase.LocationEntry.TABLE_NAME + "." + TrackDatabase.LocationEntry.COLUMN_NAME_TRACK_ID
+                + " = ? );";
+        String[] params = new String[] {String.valueOf(type), String.valueOf(trackID)};
+        database.execSQL(sql, params);
+    }
+
+    public static TrackPoint getLocationByLocationId(Context context, long locationID) {
+        SQLiteDatabase database = TrackDatabaseHelper.getInstance(context).getWritableDatabase();
+        String sql = "SELECT * FROM " + TrackDatabase.LocationEntry.TABLE_NAME
+                + " WHERE " + TrackDatabase.LocationEntry._ID
+                + " = ?;";
+        String[] params = new String[] {String.valueOf(locationID)};
+        Cursor c = database.rawQuery(sql, params);
+        TrackPoint trackPoint = null;
+        if (c.moveToFirst()) {
+            float lat = c.getFloat(c.getColumnIndex(TrackDatabase.LocationEntry.COLUMN_NAME_LAT));
+            float lng = c.getFloat(c.getColumnIndex(TrackDatabase.LocationEntry.COLUMN_NAME_LNG));
+            long timestamp = c.getLong(c.getColumnIndex(TrackDatabase.LocationEntry.COLUMN_NAME_TIMESTAMP));
+            float ele = c.getFloat(c.getColumnIndex(TrackDatabase.LocationEntry.COLUMN_NAME_ELE));
+
+            trackPoint = new TrackPoint(lat, lng, timestamp, ele);
+
+            trackPoint.gpsMeta = getGpsMetaByLocationID(context, locationID);
+            trackPoint.compass = getCompassByLocationID(context, locationID);
+            trackPoint.accelerometer = getAccelerometerByLocationID(context, locationID);
+            trackPoint.orientation = getOrientationByLocationID(context, locationID);
+            trackPoint.annotation = getAnnotationByLocationID(context, locationID);
+        }
+        c.close();
+        return trackPoint;
     }
 }

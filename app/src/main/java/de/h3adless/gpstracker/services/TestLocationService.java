@@ -11,6 +11,7 @@ import android.util.Log;
 import java.util.Random;
 
 import de.h3adless.gpstracker.AppSettings;
+import de.h3adless.gpstracker.database.Queries;
 import de.h3adless.gpstracker.utils.cgps.TrackPoint;
 
 /**
@@ -40,6 +41,10 @@ public class TestLocationService extends Service {
 			Log.d("TestLocationService", "Runnable run.");
 			if (AppSettings.getSendTracksToServer()) {
 				HttpRequest httpRequest = new HttpRequest(TestLocationService.this);
+				long trackid = -1l;
+				long locid = Queries.insertLocation(getApplicationContext(), trackid, loc.lat, loc.lng, loc.timestamp, loc.ele);
+				httpRequest.locationIds.add(locid);
+				httpRequest.trackId = trackid;
 				httpRequest.execute(loc);
 			}
 

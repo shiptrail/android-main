@@ -32,6 +32,7 @@ public class CgpsWriter extends CgpsCommon {
 
         //make sure directory exists
         if (!dir.exists() && !dir.mkdir()) {
+            Log.d("CgpsWriter","Directory does not exist and can not be created");
             return false;
         }
         Log.d("CgpsWriter","writing to: " + dir.getAbsolutePath());

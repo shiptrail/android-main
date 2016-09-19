@@ -40,7 +40,7 @@ public class TrackPoint implements Serializable{
         }
     }
 
-    public static class Compass extends MetaInfos {
+    public static class Compass extends MetaInfos{
         public float deg;
 
         public Compass(float deg, int toffset) {
@@ -49,7 +49,7 @@ public class TrackPoint implements Serializable{
         }
     }
 
-    public static class Accelerometer extends MetaInfos {
+    public static class Accelerometer extends MetaInfos{
         public float x;
         public float y;
         public float z;
@@ -62,7 +62,7 @@ public class TrackPoint implements Serializable{
         }
     }
 
-    public static class Orientation extends MetaInfos {
+    public static class Orientation extends MetaInfos{
         public float azimuth;
         public float pitch;
         public float roll;
@@ -75,7 +75,7 @@ public class TrackPoint implements Serializable{
         }
     }
 
-    public static class Annotation extends MetaInfos {
+    public static class Annotation extends MetaInfos{
         public static final String TYPE_START_JIBE = "START_JIBE";
         public static final String TYPE_MID_JIBE = "MID_JIBE";
         public static final String TYPE_END_JIBE = "END_JIBE";
@@ -91,7 +91,7 @@ public class TrackPoint implements Serializable{
         }
     }
 
-    public static class MetaInfos {
+    public static class MetaInfos implements Serializable{
         public int toffset;
     }
 }

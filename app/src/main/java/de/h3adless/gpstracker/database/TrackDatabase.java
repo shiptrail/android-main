@@ -167,4 +167,27 @@ public class TrackDatabase {
     public static final String SQL_DELETE_TRACK_TABLE =
             "DROP TABLE IF EXISTS " + TrackEntry.TABLE_NAME;
 
+    // ##### FAILED_REQUESTS - TABLE #####
+
+    public static abstract class FailedRequestsEntry implements BaseColumns {
+        public static final String TABLE_NAME = "failed_requests";
+        public static final String COLUMN_NAME_LOCATION_ID = "location_id";
+        public static final String COLUMN_NAME_TYPE = "type";
+
+        public static final int TYPE_CERTIFICATE = 1;
+        public static final int TYPE_HTTPS = 2;
+        public static final int TYPE_OTHER = 3;
+
+        public static final String SQL_CREATE_REQUESTS_FAILED_TABLE =
+                "CREATE TABLE " + TABLE_NAME + " (" +
+                        _ID + " INTEGER PRIMARY KEY" + COMMA_SEP +
+                        COLUMN_NAME_LOCATION_ID + INT_TYPE + COMMA_SEP +
+                        COLUMN_NAME_TYPE + INT_TYPE + COMMA_SEP +
+                        "FOREIGN KEY(" + COLUMN_NAME_LOCATION_ID + ") REFERENCES " + LocationEntry.TABLE_NAME + "(" + LocationEntry._ID + ")" +
+                        ")";
+
+        public static final String SQL_DELETE_REQUESTS_FAILED_TABLE =
+                "DROP TABLE IF EXISTS " + TABLE_NAME;
+    }
+
 }
