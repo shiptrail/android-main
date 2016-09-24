@@ -315,7 +315,11 @@ public class LocationService extends Service {
 
             //saving GPS META
             float accuracy = loc.getAccuracy();
-            int satcount = (int) loc.getExtras().get("satellites");
+            Bundle extras = loc.getExtras();
+            int satcount = 0;
+            if (extras != null) {
+                satcount = extras.getInt("satellites", 0);
+            }
             int toffset = 0;
             TrackPoint.GpsMeta gpsMeta = new TrackPoint.GpsMeta(accuracy, satcount, toffset);
             trackPoint.gpsMeta.add(gpsMeta);
