@@ -62,6 +62,18 @@ public class LocationListFragment extends Fragment {
         listView.setAdapter(cursorAdapter);
 
         Button sendButton = (Button) rootView.findViewById(R.id.send_button);
+        Button shareButton = (Button) rootView.findViewById(R.id.share_button);
+
+        shareButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (ContextCompat.checkSelfPermission(getActivity(), Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+                    ActivityCompat.requestPermissions(getActivity(), new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, MY_PERMISSIONS_REQUEST_WRITE_EXTERNAL_STORAGE);
+                } else {
+                    writeTmpFileAndShare();
+                }
+            }
+        });
 
         sendButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -75,12 +87,6 @@ public class LocationListFragment extends Fragment {
                         result ? R.string.location_list_fragment_saving_success : R.string.location_list_fragment_saving_failure,
                         Toast.LENGTH_LONG)
                         .show();
-/*
-                if (ContextCompat.checkSelfPermission(getActivity(), Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
-                    ActivityCompat.requestPermissions(getActivity(), new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, MY_PERMISSIONS_REQUEST_WRITE_EXTERNAL_STORAGE);
-                } else {
-                    writeTmpFileAndShare();
-                }*/
             }
         });
 
