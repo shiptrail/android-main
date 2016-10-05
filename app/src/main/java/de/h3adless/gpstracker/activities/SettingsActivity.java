@@ -27,6 +27,7 @@ public class SettingsActivity extends AppCompatActivity {
 	private LinearLayout layoutCustomServer;
 	private EditText editCustomServerUrl;
 	private EditText editCustomServerPort;
+	private Switch switchTrackExtraInformation;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -44,6 +45,7 @@ public class SettingsActivity extends AppCompatActivity {
 		layoutCustomServer = (LinearLayout) findViewById(R.id.activity_settings_custom_server_layout);
 		editCustomServerUrl = (EditText) findViewById(R.id.activity_settings_edit_custom_server_ip);
 		editCustomServerPort = (EditText) findViewById(R.id.activity_settings_edit_custom_server_port);
+		switchTrackExtraInformation = (Switch) findViewById(R.id.activity_settings_switch_track_extra_information);
 
 		editTrackInterval.setText(String.valueOf(AppSettings.getTrackingInterval()));
 		editSendTogether.setText(String.valueOf(AppSettings.getSendTogether()));
@@ -62,6 +64,7 @@ public class SettingsActivity extends AppCompatActivity {
 			editCustomServerUrl.setText(AppSettings.getCustomServerUrl());
 			editCustomServerPort.setText(AppSettings.getCustomServerPort());
 		}
+		switchTrackExtraInformation.setChecked(AppSettings.getTrackExtraInformation());
 	}
 
 	@Override
@@ -103,6 +106,7 @@ public class SettingsActivity extends AppCompatActivity {
 					}
 				}
 				AppSettings.setUseCustomServer(useCustomServer);
+				AppSettings.setTrackExtraInformation(switchTrackExtraInformation.isChecked());
 
 				finish();
 			case R.id.action_settings_cancel:

@@ -32,6 +32,7 @@ import de.h3adless.gpstracker.R;
 import de.h3adless.gpstracker.AppSettings;
 import de.h3adless.gpstracker.activities.MainActivity;
 import de.h3adless.gpstracker.database.Queries;
+import de.h3adless.gpstracker.utils.ExtraInformationTracker;
 import de.h3adless.gpstracker.utils.cgps.TrackPoint;
 
 /**
@@ -211,6 +212,9 @@ public class LocationService extends Service {
         signalsNotSent.get(signalsNotSent.size()-1).annotation.add(annotationData);
         //save annotation to DB
         Queries.insertAnnotation(getApplicationContext(), lastLocationId, annotationData);
+        ExtraInformationTracker.track(this,
+                ExtraInformationTracker.ExtraInformationType.Other,
+                "Annotation created: " + annotation);
     }
 
 
@@ -234,6 +238,9 @@ public class LocationService extends Service {
             Toast.makeText(LocationService.this,
                     getString(R.string.connection_changed, isOnline ? getString(R.string.online) : getString(R.string.offline)),
                     Toast.LENGTH_SHORT).show();
+            ExtraInformationTracker.track(getApplicationContext(),
+                    ExtraInformationTracker.ExtraInformationType.Other,
+                    "Network status: " + (isOnline ? getString(R.string.online) : getString(R.string.offline)));
         }
     }
 

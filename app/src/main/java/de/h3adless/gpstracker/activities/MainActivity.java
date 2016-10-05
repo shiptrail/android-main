@@ -28,6 +28,8 @@ import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.gson.Gson;
+
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
@@ -39,6 +41,7 @@ import de.h3adless.gpstracker.database.Queries;
 import de.h3adless.gpstracker.database.TrackDatabase;
 import de.h3adless.gpstracker.database.TrackDatabaseHelper;
 import de.h3adless.gpstracker.services.LocationService;
+import de.h3adless.gpstracker.utils.ExtraInformationTracker;
 import de.h3adless.gpstracker.utils.cgps.TrackPoint;
 
 /**
@@ -48,8 +51,6 @@ public class MainActivity extends MainActivityType {
 
     private final static String GPS = "GPS";
     private BroadcastReceiver broadcastReceiver;
-
-    private LocationService locationService;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -87,12 +88,25 @@ public class MainActivity extends MainActivityType {
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+
+        ExtraInformationTracker.track(this,
+                ExtraInformationTracker.ExtraInformationType.Battery);
+        ExtraInformationTracker.track(this,
+                ExtraInformationTracker.ExtraInformationType.Other,
+                "MainActivity got created.");
     }
 
     private void toggleTracking() {
+        ExtraInformationTracker.track(this, ExtraInformationTracker.ExtraInformationType.Battery);
         if (AppSettings.getTrackingEnabled()) {
+            ExtraInformationTracker.track(this,
+                    ExtraInformationTracker.ExtraInformationType.ToggleTracking,
+                    "disabled");
             disableTracking();
         } else {
+            ExtraInformationTracker.track(this,
+                    ExtraInformationTracker.ExtraInformationType.ToggleTracking,
+                    "enabled");
             enableTracking();
         }
         setButtonState();
@@ -103,6 +117,11 @@ public class MainActivity extends MainActivityType {
         if(AppSettings.getTrackingEnabled()) {
             unregisterReceiver(broadcastReceiver);
         }
+        ExtraInformationTracker.track(this,
+                ExtraInformationTracker.ExtraInformationType.Battery);
+        ExtraInformationTracker.track(this,
+                ExtraInformationTracker.ExtraInformationType.Other,
+                "MainActivity got destroyed.");
         super.onDestroy();
     }
 

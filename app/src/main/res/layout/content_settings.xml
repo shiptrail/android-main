@@ -1,4 +1,4 @@
-<LinearLayout
+<ScrollView
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_height="match_parent"
@@ -9,146 +9,26 @@
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin"
     tools:showIn="@layout/activity_settings"
-    tools:context=".activities.SettingsActivity"
-    android:orientation="vertical">
-
-    <Switch
-        android:id="@+id/activity_settings_switch_send_to_server"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/activity_settings_explaining_server"
-        android:textColor="@android:color/secondary_text_light"
-        android:checked="true"/>
-
-    <TextView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:textColor="@android:color/secondary_text_light"
-        android:text="@string/activity_settings_explaining_time"/>
+    tools:context=".activities.SettingsActivity">
 
     <LinearLayout
+        android:layout_height="wrap_content"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:weightSum="1">
-
-        <TextView
-            android:layout_width="0dp"
-            android:layout_weight="0.7"
-            android:layout_height="wrap_content"
-            android:textColor="@android:color/secondary_text_light"
-            android:text="@string/activity_settings_time_between_gps"/>
-
-        <EditText
-            android:id="@+id/activity_settings_edit_time_between_gps"
-            android:layout_width="0dp"
-            android:layout_weight="0.3"
-            android:layout_height="wrap_content"
-            android:ems="5"
-            android:maxLength="5"
-            android:inputType="number"/>
-
-    </LinearLayout>
-
-    <TextView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:textColor="@android:color/secondary_text_light"
-        android:text="@string/activity_settings_explaining_sending"/>
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:weightSum="1">
-
-        <TextView
-            android:layout_width="0dp"
-            android:layout_weight="0.7"
-            android:layout_height="wrap_content"
-            android:textColor="@android:color/secondary_text_light"
-            android:text="@string/activity_settings_amount_to_send_together"/>
-
-        <EditText
-            android:id="@+id/activity_settings_edit_amount_to_send_together"
-            android:layout_width="0dp"
-            android:layout_weight="0.3"
-            android:layout_height="wrap_content"
-            android:ems="2"
-            android:maxLength="2"
-            android:inputType="number"/>
-
-    </LinearLayout>
-
-    <Switch
-        android:id="@+id/activity_settings_switch_use_https"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/activity_settings_explaining_https"
-        android:textColor="@android:color/secondary_text_light"
-        android:checked="true"/>
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:gravity="center"
-        android:weightSum="1">
-
-        <TextView
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="0.6"
-            android:textColor="@android:color/secondary_text_light"
-            android:text="@string/activity_settings_delete_custom_certificates"/>
-
-        <Button
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="0.4"
-            android:text="@string/activity_settings_delete_custom_certificates_button"
-            android:onClick="deleteCustomCertificates"/>
-
-    </LinearLayout>
-
-    <Switch
-        android:id="@+id/activity_settings_switch_use_custom_server"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/activity_settings_explaining_custom"
-        android:textColor="@android:color/secondary_text_light"
-        android:checked="false"
-        android:onClick="toggleCustomServerLayout"/>
-
-    <LinearLayout
-        android:id="@+id/activity_settings_custom_server_layout"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:visibility="gone"
         android:orientation="vertical">
 
-        <LinearLayout
+        <Switch
+            android:id="@+id/activity_settings_switch_send_to_server"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/activity_settings_explaining_server"
+            android:textColor="@android:color/secondary_text_light"
+            android:checked="true"/>
+
+        <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:weightSum="1">
-
-            <TextView
-                android:layout_width="0dp"
-                android:layout_weight="0.3"
-                android:layout_height="wrap_content"
-                android:textColor="@android:color/secondary_text_light"
-                android:text="@string/activity_settings_custom_server_url"/>
-
-            <EditText
-                android:id="@+id/activity_settings_edit_custom_server_ip"
-                android:layout_width="0dp"
-                android:layout_weight="0.7"
-                android:layout_height="wrap_content"
-                android:hint="@string/activity_settings_custom_server_url_standard"
-                android:digits="1234567890."/>
-
-        </LinearLayout>
+            android:textColor="@android:color/secondary_text_light"
+            android:text="@string/activity_settings_explaining_time"/>
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -158,24 +38,157 @@
 
             <TextView
                 android:layout_width="0dp"
-                android:layout_weight="0.3"
-                android:layout_height="wrap_content"
-                android:textColor="@android:color/secondary_text_light"
-                android:text="@string/activity_settings_custom_server_port"/>
-
-            <EditText
-                android:id="@+id/activity_settings_edit_custom_server_port"
-                android:layout_width="0dp"
                 android:layout_weight="0.7"
                 android:layout_height="wrap_content"
-                android:ems="4"
-                android:maxLength="4"
-                android:hint="@string/activity_settings_custom_server_port_standard"
+                android:textColor="@android:color/secondary_text_light"
+                android:text="@string/activity_settings_time_between_gps"/>
+
+            <EditText
+                android:id="@+id/activity_settings_edit_time_between_gps"
+                android:layout_width="0dp"
+                android:layout_weight="0.3"
+                android:layout_height="wrap_content"
+                android:ems="5"
+                android:maxLength="5"
                 android:inputType="number"/>
 
         </LinearLayout>
 
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textColor="@android:color/secondary_text_light"
+            android:text="@string/activity_settings_explaining_sending"/>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:weightSum="1">
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_weight="0.7"
+                android:layout_height="wrap_content"
+                android:textColor="@android:color/secondary_text_light"
+                android:text="@string/activity_settings_amount_to_send_together"/>
+
+            <EditText
+                android:id="@+id/activity_settings_edit_amount_to_send_together"
+                android:layout_width="0dp"
+                android:layout_weight="0.3"
+                android:layout_height="wrap_content"
+                android:ems="2"
+                android:maxLength="2"
+                android:inputType="number"/>
+
+        </LinearLayout>
+
+        <Switch
+            android:id="@+id/activity_settings_switch_use_https"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/activity_settings_explaining_https"
+            android:textColor="@android:color/secondary_text_light"
+            android:checked="true"/>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center"
+            android:weightSum="1">
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="0.6"
+                android:textColor="@android:color/secondary_text_light"
+                android:text="@string/activity_settings_delete_custom_certificates"/>
+
+            <Button
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="0.4"
+                android:text="@string/activity_settings_delete_custom_certificates_button"
+                android:onClick="deleteCustomCertificates"/>
+
+        </LinearLayout>
+
+        <Switch
+            android:id="@+id/activity_settings_switch_use_custom_server"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/activity_settings_explaining_custom"
+            android:textColor="@android:color/secondary_text_light"
+            android:checked="false"
+            android:onClick="toggleCustomServerLayout"/>
+
+        <LinearLayout
+            android:id="@+id/activity_settings_custom_server_layout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:visibility="gone"
+            android:orientation="vertical">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:weightSum="1">
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_weight="0.3"
+                    android:layout_height="wrap_content"
+                    android:textColor="@android:color/secondary_text_light"
+                    android:text="@string/activity_settings_custom_server_url"/>
+
+                <EditText
+                    android:id="@+id/activity_settings_edit_custom_server_ip"
+                    android:layout_width="0dp"
+                    android:layout_weight="0.7"
+                    android:layout_height="wrap_content"
+                    android:hint="@string/activity_settings_custom_server_url_standard"
+                    android:digits="1234567890."/>
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:weightSum="1">
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_weight="0.3"
+                    android:layout_height="wrap_content"
+                    android:textColor="@android:color/secondary_text_light"
+                    android:text="@string/activity_settings_custom_server_port"/>
+
+                <EditText
+                    android:id="@+id/activity_settings_edit_custom_server_port"
+                    android:layout_width="0dp"
+                    android:layout_weight="0.7"
+                    android:layout_height="wrap_content"
+                    android:ems="4"
+                    android:maxLength="4"
+                    android:hint="@string/activity_settings_custom_server_port_standard"
+                    android:inputType="number"/>
+
+            </LinearLayout>
+
+        </LinearLayout>
+
+        <Switch
+            android:id="@+id/activity_settings_switch_track_extra_information"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/activity_settings_explaining_track_extra_information"
+            android:textColor="@android:color/secondary_text_light"
+            android:checked="false"/>
+
     </LinearLayout>
 
-</LinearLayout>
-
+</ScrollView>

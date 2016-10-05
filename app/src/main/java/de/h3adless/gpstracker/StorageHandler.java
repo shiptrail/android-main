@@ -64,6 +64,10 @@ public class StorageHandler {
 	 * Type for Storage. Used for the String AppSettings.CUSTOM_ACCEPTED_CERTIFICATES
 	 */
 	public static final String STORAGE_CUSTOM_ACCEPTED_CERTIFICATES = "custom_accepted_certificates";
+	/**
+	 * Type for Storage. Used for the String AppSettings.TRACK_EXTRA_INFORMATION
+	 */
+	public static final String STORAGE_TRACK_EXTRA_INFORMATION = "track_extra_information";
 
 	/**
 	 * @param context the context to use.

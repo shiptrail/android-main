@@ -45,6 +45,7 @@ public class AppSettings extends Application {
     private static boolean USE_CUSTOM_SERVER = false;
     private static String CUSTOM_SERVER_URL = "";
     private static String CUSTOM_SERVER_PORT = "";
+    private static boolean TRACK_EXTRA_INFORMATION = false;
 
     private static HashMap<String, Certificate[]> CUSTOM_ACCEPTED_CERTIFICATES = new HashMap<>();
 
@@ -162,6 +163,15 @@ public class AppSettings extends Application {
         StorageHandler.save(mainContext, StorageHandler.STORAGE_CUSTOM_ACCEPTED_CERTIFICATES, CUSTOM_ACCEPTED_CERTIFICATES);
     }
 
+    public static boolean getTrackExtraInformation() {
+        return TRACK_EXTRA_INFORMATION;
+    }
+
+    public static void setTrackExtraInformation(boolean trackExtraInformation) {
+        TRACK_EXTRA_INFORMATION = trackExtraInformation;
+        StorageHandler.save(mainContext, StorageHandler.STORAGE_TRACK_EXTRA_INFORMATION, TRACK_EXTRA_INFORMATION);
+    }
+
     private static void loadDataFromFile() {
         Serializable trackingEnabled = StorageHandler.load(mainContext, StorageHandler.STORAGE_TRACKING_BOOLEAN);
         if (trackingEnabled != null) {
@@ -220,6 +230,11 @@ public class AppSettings extends Application {
         Serializable customAcceptedCertificates = StorageHandler.load(mainContext, StorageHandler.STORAGE_CUSTOM_ACCEPTED_CERTIFICATES);
         if (customAcceptedCertificates != null) {
             CUSTOM_ACCEPTED_CERTIFICATES = (HashMap<String, Certificate[]>) customAcceptedCertificates;
+        }
+
+        Serializable trackExtraInformation = StorageHandler.load(mainContext, StorageHandler.STORAGE_TRACK_EXTRA_INFORMATION);
+        if (trackExtraInformation != null) {
+            TRACK_EXTRA_INFORMATION = (boolean) trackExtraInformation;
         }
 
     }

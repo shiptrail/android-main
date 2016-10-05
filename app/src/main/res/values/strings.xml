@@ -35,6 +35,7 @@
     <string name="activity_settings_delete_custom_certificates">Manuell akzeptierte Zertifikate löschen?</string>
     <string name="activity_settings_delete_custom_certificates_button">Löschen</string>
     <string name="activity_settings_toast_deleted_successfully">Manuell akzeptierte Zertifikate wurden gelöscht.</string>
+    <string name="activity_settings_explaining_track_extra_information">Extra-Informationen (Akku-, Netzwerkdaten, etc.) in Datei speichern?</string>
 
     <string name="server_route">/v2/%1$s/send</string>
 
@@ -63,5 +64,7 @@
     <string name="connection_changed">Der Netzwerkstatus hat sich geändert. Jetzt: %1$s</string>
     <string name="online">Online</string>
     <string name="offline">Offline</string>
+
+    <string name="extra_information_tracking_failed_title">Fehler beim Speichern der Extra-Informationen</string>
 
 </resources>

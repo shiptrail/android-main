@@ -29,6 +29,7 @@ import de.h3adless.gpstracker.R;
 import de.h3adless.gpstracker.activities.MainActivity;
 import de.h3adless.gpstracker.database.Queries;
 import de.h3adless.gpstracker.database.TrackDatabase;
+import de.h3adless.gpstracker.utils.ExtraInformationTracker;
 import de.h3adless.gpstracker.utils.cgps.TrackPoint;
 
 /**
@@ -46,6 +47,9 @@ public class HttpRequest extends AsyncTask<TrackPoint, Integer, Void> {
 
     public ArrayList<Long> locationIds = new ArrayList<>();
     public long trackId;
+
+    private long startTime = 0;
+    private long endTime = 0;
 
     public HttpRequest( Context context) {
         this.context = context;
@@ -74,6 +78,7 @@ public class HttpRequest extends AsyncTask<TrackPoint, Integer, Void> {
             if (BuildConfig.DEBUG) {
                 TrafficStats.setThreadStatsTag(0x1000);
             }
+            startTime = System.currentTimeMillis();
             URL url = new URL(URL);
             Log.d("HttpRequest", "Url to send: " + URL);
 
@@ -130,12 +135,31 @@ public class HttpRequest extends AsyncTask<TrackPoint, Integer, Void> {
 
             int responseCode = connection.getResponseCode();
 
-            Log.d("HttpRequest", "ResponseCode: " + responseCode);
+            endTime = System.currentTimeMillis();
 
+            Log.d("HttpRequest", "ResponseCode: " + responseCode);
+            ExtraInformationTracker.track(context, ExtraInformationTracker.ExtraInformationType.Battery);
+            ExtraInformationTracker.track(context, ExtraInformationTracker.ExtraInformationType.Network,
+                    URL,
+                    json,
+                    String.valueOf(responseCode),
+                    String.valueOf(endTime - startTime));
             connection.disconnect();
             return null;
         } catch (IOException e) {
             e.printStackTrace();
+
+            ExtraInformationTracker.track(context, ExtraInformationTracker.ExtraInformationType.Battery);
+            String time = "";
+            if (endTime != 0) {
+                time = String.valueOf(endTime - startTime);
+            }
+            ExtraInformationTracker.track(context,
+                    ExtraInformationTracker.ExtraInformationType.Network,
+                    URL,
+                    new Gson().toJson(locations),
+                    e.getMessage(),
+                    time);
 
             //für Informationen siehe https://developer.android.com/training/articles/security-ssl.html
             //allgemeine HTTPS Probleme/manuelles Akzeptieren vom Zert. gescheitert: HTTP Probieren-Dialog.

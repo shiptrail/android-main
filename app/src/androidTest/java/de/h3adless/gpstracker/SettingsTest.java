@@ -38,6 +38,7 @@ public class SettingsTest {
 	Switch switchUseCustomServer;
 	EditText editCustomIp;
 	EditText editCustomPort;
+	Switch switchTrackExtraInformation;
 
 	@Rule
 	public ActivityTestRule<SettingsActivity> mActivityRule = new ActivityTestRule<SettingsActivity>(SettingsActivity.class);
@@ -53,6 +54,7 @@ public class SettingsTest {
 		switchUseCustomServer = (Switch) activity.findViewById(R.id.activity_settings_switch_use_custom_server);
 		editCustomIp = (EditText) activity.findViewById(R.id.activity_settings_edit_custom_server_ip);
 		editCustomPort = (EditText) activity.findViewById(R.id.activity_settings_edit_custom_server_port);
+		switchTrackExtraInformation = (Switch) activity.findViewById(R.id.activity_settings_switch_track_extra_information);
 	}
 
 	@Test
@@ -65,6 +67,7 @@ public class SettingsTest {
 		final boolean useHttps = random.nextBoolean();
 		final String customIp = random.nextBoolean() ? "123.123.123.123" : "255.255.255.255";
 		final String customPort = String.valueOf(random.nextInt(9000));
+		final boolean trackExtraInformation = random.nextBoolean();
 
 		//fill settings with it
 		mActivityRule.runOnUiThread(new Runnable() {
@@ -77,6 +80,7 @@ public class SettingsTest {
 				switchUseCustomServer.setChecked(true);
 				editCustomIp.setText(customIp);
 				editCustomPort.setText(customPort);
+				switchTrackExtraInformation.setChecked(trackExtraInformation);
 
 			}
 		});
@@ -95,6 +99,7 @@ public class SettingsTest {
 		onView(withId(R.id.activity_settings_switch_use_custom_server)).check(matches(isChecked()));
 		onView(withId(R.id.activity_settings_edit_custom_server_ip)).check(matches(withText(customIp)));
 		onView(withId(R.id.activity_settings_edit_custom_server_port)).check(matches(withText(customPort)));
+		onView(withId(R.id.activity_settings_switch_track_extra_information)).check(matches(trackExtraInformation ? isChecked() : isNotChecked()));
 	}
 
 
