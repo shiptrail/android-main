@@ -23,6 +23,7 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.NotificationCompat;
+import android.telephony.TelephonyManager;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -222,6 +223,9 @@ public class LocationService extends Service {
      * source:
      * https://developer.android.com/training/basics/network-ops/managing.html
      * and http://stackoverflow.com/questions/1783117/network-listener-android
+     *
+     * see also http://stackoverflow.com/questions/2802472/detect-network-connection-type-on-android
+     * for information about different network types
      */
     public class ConnectionChangeReceiver extends BroadcastReceiver
     {
@@ -232,15 +236,80 @@ public class LocationService extends Service {
         }
 
         public void checkOnline() {
-            ConnectivityManager connectivityManager = (ConnectivityManager) getSystemService( Context.CONNECTIVITY_SERVICE );
+            ConnectivityManager connectivityManager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
             NetworkInfo networkInfo = connectivityManager.getActiveNetworkInfo();
             isOnline = (networkInfo != null && networkInfo.isConnected());
             Toast.makeText(LocationService.this,
                     getString(R.string.connection_changed, isOnline ? getString(R.string.online) : getString(R.string.offline)),
                     Toast.LENGTH_SHORT).show();
+
+            String networkType = "";
+            if (networkInfo == null) {
+                networkType = "Unknown";
+            } else {
+                int type = networkInfo.getType();
+                if (type == ConnectivityManager.TYPE_WIFI) {
+                    networkType = "WIFI";
+                } else if (type == ConnectivityManager.TYPE_MOBILE) {
+                    networkType = "MOBILE / ";
+                    int subtype = networkInfo.getSubtype();
+                    switch (subtype) {
+                        case TelephonyManager.NETWORK_TYPE_1xRTT:
+                            networkType += "1xRTT 50-100Kbps";
+                            break;
+                        case TelephonyManager.NETWORK_TYPE_CDMA:
+                            networkType += "CDMA 14-64Kbps";
+                            break;
+                        case TelephonyManager.NETWORK_TYPE_EDGE:
+                            networkType += "EDGE 50-100Kbps";
+                            break;
+                        case TelephonyManager.NETWORK_TYPE_EVDO_0:
+                            networkType += "EVDO_0 400-1000Kbps";
+                            break;
+                        case TelephonyManager.NETWORK_TYPE_EVDO_A:
+                            networkType += "EVDO_A 600-1400Kbps";
+                            break;
+                        case TelephonyManager.NETWORK_TYPE_GPRS:
+                            networkType += "GPRS 100Kbps";
+                            break;
+                        case TelephonyManager.NETWORK_TYPE_HSDPA:
+                            networkType += "HSDPA 2-14Mbps";
+                            break;
+                        case TelephonyManager.NETWORK_TYPE_HSPA:
+                            networkType += "HSPA 700-1700Kbps";
+                            break;
+                        case TelephonyManager.NETWORK_TYPE_HSUPA:
+                            networkType += "HSUPA 1-23Mbps";
+                            break;
+                        case TelephonyManager.NETWORK_TYPE_UMTS:
+                            networkType += "UMTS 400-7000Kbps";
+                            break;
+                        case TelephonyManager.NETWORK_TYPE_EHRPD:
+                            networkType += "EHRPD 1-2Mbps";
+                            break;
+                        case TelephonyManager.NETWORK_TYPE_EVDO_B:
+                            networkType += "EVDO_B 5Mbps";
+                            break;
+                        case TelephonyManager.NETWORK_TYPE_HSPAP:
+                            networkType += "HSPAP 10-20Mbps";
+                            break;
+                        case TelephonyManager.NETWORK_TYPE_IDEN:
+                            networkType += "IDEN 25kbps";
+                            break;
+                        case TelephonyManager.NETWORK_TYPE_LTE:
+                            networkType += "LTE 10+Mbps";
+                            break;
+                        case TelephonyManager.NETWORK_TYPE_UNKNOWN:
+                        default:
+                            networkType += "Unknown";
+                    }
+                }
+            }
+
             ExtraInformationTracker.track(getApplicationContext(),
                     ExtraInformationTracker.ExtraInformationType.Other,
-                    "Network status: " + (isOnline ? getString(R.string.online) : getString(R.string.offline)));
+                    "Network status: " + (isOnline ? getString(R.string.online) : getString(R.string.offline)),
+                    "Network Type Information: " + networkType);
         }
     }
 
