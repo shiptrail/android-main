@@ -6,10 +6,6 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.util.Log;
 
-import com.google.gson.Gson;
-
-import org.json.JSONObject;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -61,55 +57,201 @@ public class Queries {
     }
 
     public static List<TrackPoint> getLocationsByTrackID(Context context, long trackID) {
-        String[] entriesProjection = {
-                TrackDatabase.LocationEntry._ID,
-                TrackDatabase.LocationEntry.COLUMN_NAME_TRACK_ID,
-                TrackDatabase.LocationEntry.COLUMN_NAME_LAT,
-                TrackDatabase.LocationEntry.COLUMN_NAME_LNG,
-                TrackDatabase.LocationEntry.COLUMN_NAME_TIMESTAMP,
-                TrackDatabase.LocationEntry.COLUMN_NAME_ELE
-        };
-
-        String sortOrder = TrackDatabase.LocationEntry.COLUMN_NAME_TIMESTAMP + " ASC";
-        String whereClause = TrackDatabase.LocationEntry.COLUMN_NAME_TRACK_ID + " = ?";
-
-        SQLiteDatabase db = TrackDatabaseHelper.getInstance(context).getReadableDatabase();
-        Cursor c = db.query(
-                TrackDatabase.LocationEntry.TABLE_NAME,
-                entriesProjection,
-                whereClause,
-                new String[]{String.valueOf(trackID)},
-                null,
-                null,
-                sortOrder
-        );
-
-        List<TrackPoint> locs = new ArrayList<>();
-
-        while (c.moveToNext()) {
-
+        String sql = "SELECT " +
+                TrackDatabase.LocationEntry._ID + "," +
+                TrackDatabase.LocationEntry.COLUMN_NAME_LAT + "," +
+                TrackDatabase.LocationEntry.COLUMN_NAME_LNG + "," +
+                TrackDatabase.LocationEntry.COLUMN_NAME_ELE + "," +
+                TrackDatabase.LocationEntry.COLUMN_NAME_TIMESTAMP +
+                " FROM " + TrackDatabase.LocationEntry.TABLE_NAME +
+                " WHERE " + TrackDatabase.LocationEntry.COLUMN_NAME_TRACK_ID + " =?" +
+                " ORDER BY " + TrackDatabase.LocationEntry._ID;
+        SQLiteDatabase db = TrackDatabaseHelper.getInstance(context).getWritableDatabase();
+        Cursor c = db.rawQuery(sql, new String[] {String.valueOf(trackID)});
+        List<TrackPoint> list = new ArrayList<>();
+        if (!c.moveToFirst()) {
+            c.close();
+            return list;
+        }
+        do {
             float lat = c.getFloat(c.getColumnIndex(TrackDatabase.LocationEntry.COLUMN_NAME_LAT));
             float lng = c.getFloat(c.getColumnIndex(TrackDatabase.LocationEntry.COLUMN_NAME_LNG));
             long timestamp = c.getLong(c.getColumnIndex(TrackDatabase.LocationEntry.COLUMN_NAME_TIMESTAMP));
             float ele = c.getFloat(c.getColumnIndex(TrackDatabase.LocationEntry.COLUMN_NAME_ELE));
-
-            TrackPoint loc = new TrackPoint(lat, lng, timestamp, ele);
-
-            int locationID = c.getInt(c.getColumnIndex(TrackDatabase.LocationEntry._ID));
-            loc.gpsMeta = getGpsMetaByLocationID(context, locationID);
-            loc.compass = getCompassByLocationID(context, locationID);
-            loc.accelerometer = getAccelerometerByLocationID(context, locationID);
-            loc.orientation = getOrientationByLocationID(context, locationID);
-            loc.annotation = getAnnotationByLocationID(context, locationID);
-
-            locs.add(loc);
-        }
-
+            TrackPoint tp = new TrackPoint(lat,lng,timestamp,ele);
+            list.add(tp);
+        } while (c.moveToNext());
         c.close();
-        return locs;
+
+        sql = "SELECT " +
+                TrackDatabase.LocationEntry.TABLE_NAME + "." + TrackDatabase.LocationEntry._ID + "," +
+                TrackDatabase.GpsMetaEntry.TABLE_NAME + "." + TrackDatabase.GpsMetaEntry.COLUMN_NAME_TOFFSET + "," +
+                TrackDatabase.GpsMetaEntry.TABLE_NAME + "." + TrackDatabase.GpsMetaEntry.COLUMN_NAME_SATCOUNT + "," +
+                TrackDatabase.GpsMetaEntry.TABLE_NAME + "." + TrackDatabase.GpsMetaEntry.COLUMN_NAME_ACCURACY +
+                " FROM " + TrackDatabase.LocationEntry.TABLE_NAME +
+                " JOIN " + TrackDatabase.GpsMetaEntry.TABLE_NAME +
+                " ON " + TrackDatabase.LocationEntry.TABLE_NAME + "." + TrackDatabase.LocationEntry._ID +
+                " = " + TrackDatabase.GpsMetaEntry.TABLE_NAME + "." + TrackDatabase.GpsMetaEntry.COLUMN_NAME_LOCATION_ID +
+                " WHERE " + TrackDatabase.LocationEntry.TABLE_NAME + "." + TrackDatabase.LocationEntry.COLUMN_NAME_TRACK_ID + " = ?" +
+                " ORDER BY " + TrackDatabase.LocationEntry.TABLE_NAME + "." + TrackDatabase.LocationEntry._ID;
+        Cursor c1 = db.rawQuery(sql, new String[]{String.valueOf(trackID)});
+        long lastLocID = -1;
+        int locIndex = -1;
+        if (!c1.moveToFirst()) {
+            c1.close();
+        } else {
+            do {
+                long locID = c1.getLong(c1.getColumnIndex(TrackDatabase.LocationEntry._ID));
+                if (locID != lastLocID) {
+                    locIndex++;
+                    lastLocID = locID;
+                }
+                float accuracy = c1.getFloat(c1.getColumnIndex(TrackDatabase.GpsMetaEntry.COLUMN_NAME_ACCURACY));
+                int satcount = c1.getInt(c1.getColumnIndex(TrackDatabase.GpsMetaEntry.COLUMN_NAME_SATCOUNT));
+                int toffset = c1.getInt(c1.getColumnIndex(TrackDatabase.GpsMetaEntry.COLUMN_NAME_TOFFSET));
+                TrackPoint.GpsMeta gpsMeta = new TrackPoint.GpsMeta(accuracy,satcount,toffset);
+                list.get(locIndex).gpsMeta.add(gpsMeta);
+            } while (c1.moveToNext());
+        }
+        c1.close();
+
+        sql = "SELECT " +
+                TrackDatabase.LocationEntry.TABLE_NAME + "." + TrackDatabase.LocationEntry._ID + "," +
+                TrackDatabase.CompassEntry.TABLE_NAME + "." + TrackDatabase.CompassEntry.COLUMN_NAME_TOFFSET + "," +
+                TrackDatabase.CompassEntry.TABLE_NAME + "." + TrackDatabase.CompassEntry.COLUMN_NAME_DEG +
+                " FROM " + TrackDatabase.LocationEntry.TABLE_NAME +
+                " JOIN " + TrackDatabase.CompassEntry.TABLE_NAME +
+                " ON " + TrackDatabase.LocationEntry.TABLE_NAME + "." + TrackDatabase.LocationEntry._ID +
+                " = " + TrackDatabase.CompassEntry.TABLE_NAME + "." + TrackDatabase.CompassEntry.COLUMN_NAME_LOCATION_ID +
+                " WHERE " + TrackDatabase.LocationEntry.TABLE_NAME + "." + TrackDatabase.LocationEntry.COLUMN_NAME_TRACK_ID + " = ?" +
+                " ORDER BY " + TrackDatabase.LocationEntry.TABLE_NAME + "." + TrackDatabase.LocationEntry._ID;
+        Cursor c2 = db.rawQuery(sql, new String[]{String.valueOf(trackID)});
+        lastLocID = -1;
+        locIndex = -1;
+        if (!c2.moveToFirst()) {
+            c2.close();
+        } else {
+            do {
+                long locID = c2.getLong(c2.getColumnIndex(TrackDatabase.LocationEntry._ID));
+                if (locID != lastLocID) {
+                    Log.d("Queries","insert locs fast. old locid: " + lastLocID + " new one: " + locID);
+                    locIndex++;
+                    lastLocID = locID;
+                }
+                float deg = c2.getFloat(c2.getColumnIndex(TrackDatabase.CompassEntry.COLUMN_NAME_DEG));
+                int toffset = c2.getInt(c2.getColumnIndex(TrackDatabase.CompassEntry.COLUMN_NAME_TOFFSET));
+                TrackPoint.Compass compass = new TrackPoint.Compass(deg,toffset);
+                list.get(locIndex).compass.add(compass);
+            } while (c2.moveToNext());
+        }
+        c2.close();
+
+        sql = "SELECT " +
+                TrackDatabase.LocationEntry.TABLE_NAME + "." + TrackDatabase.LocationEntry._ID + "," +
+                TrackDatabase.AnnotationEntry.TABLE_NAME + "." + TrackDatabase.AnnotationEntry.COLUMN_NAME_TOFFSET + "," +
+                TrackDatabase.AnnotationEntry.TABLE_NAME + "." + TrackDatabase.AnnotationEntry.COLUMN_NAME_TYPE +
+                " FROM " + TrackDatabase.LocationEntry.TABLE_NAME +
+                " JOIN " + TrackDatabase.AnnotationEntry.TABLE_NAME +
+                " ON " + TrackDatabase.LocationEntry.TABLE_NAME + "." + TrackDatabase.LocationEntry._ID +
+                " = " + TrackDatabase.AnnotationEntry.TABLE_NAME + "." + TrackDatabase.AnnotationEntry.COLUMN_NAME_LOCATION_ID +
+                " WHERE " + TrackDatabase.LocationEntry.TABLE_NAME + "." + TrackDatabase.LocationEntry.COLUMN_NAME_TRACK_ID + " = ?" +
+                " ORDER BY " + TrackDatabase.LocationEntry.TABLE_NAME + "." + TrackDatabase.LocationEntry._ID;
+        Cursor c3 = db.rawQuery(sql, new String[]{String.valueOf(trackID)});
+        lastLocID = -1;
+        locIndex = -1;
+        if (!c3.moveToFirst()) {
+            c3.close();
+        } else {
+            do {
+                long locID = c3.getLong(c3.getColumnIndex(TrackDatabase.LocationEntry._ID));
+                if (locID != lastLocID) {
+                    locIndex++;
+                    lastLocID = locID;
+                }
+                String type = c3.getString(c3.getColumnIndex(TrackDatabase.AnnotationEntry.COLUMN_NAME_TYPE));
+                int toffset = c3.getInt(c3.getColumnIndex(TrackDatabase.AnnotationEntry.COLUMN_NAME_TOFFSET));
+                TrackPoint.Annotation annotation = new TrackPoint.Annotation(type,toffset);
+                list.get(locIndex).annotation.add(annotation);
+            } while (c3.moveToNext());
+        }
+        c3.close();
+
+        sql = "SELECT " +
+                TrackDatabase.LocationEntry.TABLE_NAME + "." + TrackDatabase.LocationEntry._ID + "," +
+                TrackDatabase.AccelerometerEntry.TABLE_NAME + "." + TrackDatabase.AccelerometerEntry.COLUMN_NAME_TOFFSET + "," +
+                TrackDatabase.AccelerometerEntry.TABLE_NAME + "." + TrackDatabase.AccelerometerEntry.COLUMN_NAME_X + "," +
+                TrackDatabase.AccelerometerEntry.TABLE_NAME + "." + TrackDatabase.AccelerometerEntry.COLUMN_NAME_Y + "," +
+                TrackDatabase.AccelerometerEntry.TABLE_NAME + "." + TrackDatabase.AccelerometerEntry.COLUMN_NAME_Z +
+                " FROM " + TrackDatabase.LocationEntry.TABLE_NAME +
+                " JOIN " + TrackDatabase.AccelerometerEntry.TABLE_NAME +
+                " ON " + TrackDatabase.LocationEntry.TABLE_NAME + "." + TrackDatabase.LocationEntry._ID +
+                " = " + TrackDatabase.AccelerometerEntry.TABLE_NAME + "." + TrackDatabase.AccelerometerEntry.COLUMN_NAME_LOCATION_ID +
+                " WHERE " + TrackDatabase.LocationEntry.TABLE_NAME + "." + TrackDatabase.LocationEntry.COLUMN_NAME_TRACK_ID + " = ?" +
+                " ORDER BY " + TrackDatabase.LocationEntry.TABLE_NAME + "." + TrackDatabase.LocationEntry._ID;
+        Cursor c4 = db.rawQuery(sql, new String[]{String.valueOf(trackID)});
+        lastLocID = -1;
+        locIndex = -1;
+        if (!c4.moveToFirst()) {
+            c4.close();
+        } else {
+            do {
+                long locID = c4.getLong(c4.getColumnIndex(TrackDatabase.LocationEntry._ID));
+                if (locID != lastLocID) {
+                    locIndex++;
+                    lastLocID = locID;
+                }
+                float x = c4.getFloat(c4.getColumnIndex(TrackDatabase.AccelerometerEntry.COLUMN_NAME_X));
+                float y = c4.getFloat(c4.getColumnIndex(TrackDatabase.AccelerometerEntry.COLUMN_NAME_Y));
+                float z = c4.getFloat(c4.getColumnIndex(TrackDatabase.AccelerometerEntry.COLUMN_NAME_Z));
+                int toffset = c4.getInt(c4.getColumnIndex(TrackDatabase.AccelerometerEntry.COLUMN_NAME_TOFFSET));
+                TrackPoint.Accelerometer accelerometer = new TrackPoint.Accelerometer(x,y,z,toffset);
+                list.get(locIndex).accelerometer.add(accelerometer);
+            } while (c4.moveToNext());
+        }
+        c4.close();
+
+        sql = "SELECT location._id,orientation.toffset,orientation.azimuth,orientation.pitch,orientation.roll FROM location JOIN orientation ON location._id = orientation.location_id WHERE location.track_id = ? ORDER BY location._id";
+        Log.d("Queries","insert fast. sql : " + sql);
+        sql = "SELECT " +
+                TrackDatabase.LocationEntry.TABLE_NAME + "." + TrackDatabase.LocationEntry._ID + "," +
+                TrackDatabase.OrientationEntry.TABLE_NAME + "." + TrackDatabase.OrientationEntry.COLUMN_NAME_TOFFSET + "," +
+                TrackDatabase.OrientationEntry.TABLE_NAME + "." + TrackDatabase.OrientationEntry.COLUMN_NAME_AZIMUTH + "," +
+                TrackDatabase.OrientationEntry.TABLE_NAME + "." + TrackDatabase.OrientationEntry.COLUMN_NAME_PITCH + "," +
+                TrackDatabase.OrientationEntry.TABLE_NAME + "." + TrackDatabase.OrientationEntry.COLUMN_NAME_ROLL +
+                " FROM " + TrackDatabase.LocationEntry.TABLE_NAME +
+                " JOIN " + TrackDatabase.OrientationEntry.TABLE_NAME +
+                " ON " + TrackDatabase.LocationEntry.TABLE_NAME + "." + TrackDatabase.LocationEntry._ID +
+                " = " + TrackDatabase.OrientationEntry.TABLE_NAME + "." + TrackDatabase.OrientationEntry.COLUMN_NAME_LOCATION_ID +
+                " WHERE " + TrackDatabase.LocationEntry.TABLE_NAME + "." + TrackDatabase.LocationEntry.COLUMN_NAME_TRACK_ID + " = ?" +
+                " ORDER BY " + TrackDatabase.LocationEntry.TABLE_NAME + "." + TrackDatabase.LocationEntry._ID;
+        Log.d("Queries","insert fast. sql2 : " + sql);
+        Cursor c5 = db.rawQuery(sql, new String[]{String.valueOf(trackID)});
+        lastLocID = -1;
+        locIndex = -1;
+        if (!c5.moveToFirst()) {
+            c5.close();
+        } else {
+            do {
+                long locID = c5.getLong(c5.getColumnIndex(TrackDatabase.LocationEntry._ID));
+                if (locID != lastLocID) {
+                    locIndex++;
+                    lastLocID = locID;
+                }
+                float azimuth = c5.getFloat(c5.getColumnIndex(TrackDatabase.OrientationEntry.COLUMN_NAME_AZIMUTH));
+                float pitch = c5.getFloat(c5.getColumnIndex(TrackDatabase.OrientationEntry.COLUMN_NAME_PITCH));
+                float roll = c5.getFloat(c5.getColumnIndex(TrackDatabase.OrientationEntry.COLUMN_NAME_ROLL));
+                int toffset = c5.getInt(c5.getColumnIndex(TrackDatabase.OrientationEntry.COLUMN_NAME_TOFFSET));
+                TrackPoint.Orientation orientation = new TrackPoint.Orientation(azimuth,pitch,roll,toffset);
+                list.get(locIndex).orientation.add(orientation);
+            } while (c5.moveToNext());
+        }
+        c5.close();
+
+        return list;
     }
 
-    public static List<TrackPoint.GpsMeta> getGpsMetaByLocationID(Context context, long locationID) {
+
+    private static List<TrackPoint.GpsMeta> getGpsMetaByLocationID(Context context, long locationID) {
         SQLiteDatabase database = TrackDatabaseHelper.getInstance(context).getReadableDatabase();
 
         String sql = "SELECT " +
@@ -138,7 +280,7 @@ public class Queries {
         return gpsMetas;
     }
 
-    public static List<TrackPoint.Compass> getCompassByLocationID(Context context, long locationID) {
+    private static List<TrackPoint.Compass> getCompassByLocationID(Context context, long locationID) {
         SQLiteDatabase database = TrackDatabaseHelper.getInstance(context).getReadableDatabase();
 
         String sql = "SELECT " +
@@ -165,7 +307,7 @@ public class Queries {
         return compasses;
     }
 
-    public static List<TrackPoint.Accelerometer> getAccelerometerByLocationID(Context context, long locationID) {
+    private static List<TrackPoint.Accelerometer> getAccelerometerByLocationID(Context context, long locationID) {
         SQLiteDatabase database = TrackDatabaseHelper.getInstance(context).getReadableDatabase();
 
         String sql = "SELECT " +
@@ -196,7 +338,7 @@ public class Queries {
         return accelerometers;
     }
 
-    public static List<TrackPoint.Orientation> getOrientationByLocationID(Context context, long locationID) {
+    private static List<TrackPoint.Orientation> getOrientationByLocationID(Context context, long locationID) {
         SQLiteDatabase database = TrackDatabaseHelper.getInstance(context).getReadableDatabase();
 
         String sql = "SELECT " +
@@ -227,7 +369,7 @@ public class Queries {
         return orientations;
     }
 
-    public static List<TrackPoint.Annotation> getAnnotationByLocationID(Context context, long locationID) {
+    private static List<TrackPoint.Annotation> getAnnotationByLocationID(Context context, long locationID) {
         SQLiteDatabase database = TrackDatabaseHelper.getInstance(context).getReadableDatabase();
 
         String sql = "SELECT " +
