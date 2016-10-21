@@ -98,8 +98,11 @@ public class SettingsActivity extends AppCompatActivity {
 				if (useCustomServer) {
 					String customServerUrl = editCustomServerUrl.getText().toString();
 					String customServerPort = editCustomServerPort.getText().toString();
-					if (customServerPort.equals("") || customServerUrl.equals("")) {
+					if (customServerUrl.equals("")) {
 						useCustomServer = false;
+					} else if (customServerPort.equals("")) {
+						AppSettings.setCustomServerUrl(customServerUrl);
+						AppSettings.setCustomServerPort(getString(R.string.activity_settings_custom_server_port_standard));
 					} else {
 						AppSettings.setCustomServerUrl(customServerUrl);
 						AppSettings.setCustomServerPort(customServerPort);
